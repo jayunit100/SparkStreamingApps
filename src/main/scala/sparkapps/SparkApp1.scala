@@ -16,6 +16,7 @@ object SparkApp1 {
       val logFile = "/etc/passwd" // Should be some file on your system
       val conf = new SparkConf()
           .setAppName("Simple Application")
+          //this needs to be parameterized.
           .setMaster("local")
 
       val sc = new SparkContext(conf)
