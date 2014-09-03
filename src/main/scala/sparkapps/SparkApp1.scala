@@ -13,42 +13,38 @@ object SparkApp1 {
 
   /* SimpleApp.scala */
   def sparkJob() = {
-    def main(args: Array[String]) {
+
       val logFile = "/etc/passwd" // Should be some file on your system
       val conf = new SparkConf()
           .setAppName("Simple Application")
           //this needs to be parameterized.
           .setMaster("local")
 
-    val logFile = "/etc/passwd" // Should be some file on your system
-    val conf = new SparkConf()
-        .setAppName("Simple Application")
-        .setMaster("local")
 
-    val sc = new SparkContext(conf)
+      val sc = new SparkContext(conf)
 
-    val logData = sc.textFile(logFile, 2).cache()
+      val logData = sc.textFile(logFile, 2).cache()
 
-    val numAs =
-      logData.filter(line => line.contains("a")).count()
+      val numAs =
+        logData.filter(line => line.contains("a")).count()
 
-    val numBs =
-      logData.filter(line => line.contains("b")).count()
+      val numBs =
+        logData.filter(line => line.contains("b")).count()
 
-    val piped = logData.pipe("grep a").collect();
+      val piped = logData.pipe("grep a").collect();
 
-    println("Lines with a: %s, Lines with b: %s".format(numAs, numBs))
-  }
+      println("Lines with a: %s, Lines with b: %s".format(numAs, numBs))
+    }
 
 
     def main(args: Array[String]) {
-      if(args.length==0)
-        merger();
-      else {
-        args(0) match   {
-        case "1" => sparkJob();
+        if(args.length == 0)
+          System.err.println("Failing: No args.")
+          System.exit(1);
+
+        Integer.parseInt(args(0)) match {
+          case xx if xx <= 100 => sparkJob();
+          case xx if xx > 100 => System.err.println("Failing, too much. just prototype");
         }
     }
-    }
-
-}
+ }
