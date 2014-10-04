@@ -11,7 +11,7 @@ import littlepetstore.PetStoreActors.PetStoreActor;
 
 import scala.tools.cmd.ParserUtil
 
-object LittlePetStore {
+object PetStoreApp{
 
 
   class PetStoreHumanActorActions[T](self: PetStoreActor[T]) {
@@ -82,11 +82,11 @@ object LittlePetStore {
     println();
     actors match {
       case (_: Employee) :: (_: Employee) :: tail
-        => {println("nice 2  employees to start with ")};
+      => {println("nice 2  employees to start with ")};
       case Nil
-        => {println("list is nill.  not way to match.")}
+      => {println("list is nill.  not way to match.")}
       case _
-        => {println("no match")}
+      => {println("no match")}
     }
 
 
@@ -131,8 +131,6 @@ object LittlePetStore {
     demoCases();
     demoActors();
   }
-
-
 
   def main(args: Array[String]) {
 

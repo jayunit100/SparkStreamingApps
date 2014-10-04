@@ -5,25 +5,18 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 
-
 /**
  * Created by apache on 7/20/14.
  */
 object SparkApp1 {
 
-  /* SimpleApp.scala */
   def sparkJob() = {
-    def main(args: Array[String]) {
+
       val logFile = "/etc/passwd" // Should be some file on your system
       val conf = new SparkConf()
           .setAppName("Simple Application")
           //this needs to be parameterized.
           .setMaster("local")
-
-    val logFile = "/etc/passwd" // Should be some file on your system
-    val conf = new SparkConf()
-        .setAppName("Simple Application")
-        .setMaster("local")
 
     val sc = new SparkContext(conf)
 
@@ -41,14 +34,13 @@ object SparkApp1 {
   }
 
 
-    def main(args: Array[String]) {
+  def main(args: Array[String]) {
       if(args.length==0)
-        merger();
+        sparkJob();
       else {
         args(0) match   {
         case "1" => sparkJob();
         }
-    }
-    }
-
+      }
+  }
 }
