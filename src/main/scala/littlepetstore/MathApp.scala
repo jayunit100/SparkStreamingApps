@@ -21,6 +21,9 @@ object MathApp extends App {
   def x: Int = 2;
   def y: Int = 4;
   println(pow(x, y))
+
+
+
 }
 
 

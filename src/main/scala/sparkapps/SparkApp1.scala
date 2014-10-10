@@ -18,7 +18,6 @@ object SparkApp1 {
           //this needs to be parameterized.
           .setMaster("local")
 
-
       val sc = new SparkContext(conf)
 
       val logData = sc.textFile(logFile, 2).cache()

@@ -25,19 +25,62 @@ object Utils {
     options
   }
 
-  def parseCommandLineWithTwitterCredentials(args: Array[String]) = {
+  /**
+   * Test several arguments.
+   * Partially this is an experiment w/ scala syntax :)
+   * If any tests fail, an error condition is called.
+   * At the end, if failure, the System exits.
+   */
+  def checkpoint(
+                  tester : Any => Boolean,
+                  error : Any => Unit,
+                  inputs: List[String]): Unit = {
+    System.out.println("~~~~~~ Checkpoint ~~~~~")
+    def test(failures:Int, tests : List[String]):Boolean= {
+      tests match {
+        case List() => {
+          return failures == 0
+        }
+        case other => {
+          return test(failures + {
+            if (tester(tests.head)){0} else {
+              error(tests.head)
+              1
+            }
+          },
+          tests.tail)
+        }
+      }
+      tester(tests.head)
+    }
+   if ( ! test(0,inputs) )
+     System.exit(2)
+  }
+
+  /**
+   * Modifications...
+   */
+  def parseCommandLineWithTwitterCredentials(args: Array[String]) : Option[Array[AnyRef]] = {
     val parser = new PosixParser
     try {
       val cl = parser.parse(THE_OPTIONS, args)
+      /**
+       * Parse twitter args and put them on system properties.
+       */
       System.setProperty("twitter4j.oauth.consumerKey", cl.getOptionValue(CONSUMER_KEY))
       System.setProperty("twitter4j.oauth.consumerSecret", cl.getOptionValue(CONSUMER_SECRET))
       System.setProperty("twitter4j.oauth.accessToken", cl.getOptionValue(ACCESS_TOKEN))
       System.setProperty("twitter4j.oauth.accessTokenSecret", cl.getOptionValue(ACCESS_TOKEN_SECRET))
-      cl.getArgList.toArray
-    } catch {
+      System.out.println("Returning " + cl.getArgList.toArray());
+      /**
+       * Return the rest of the arguments as a list.
+       */
+      Some(cl.getArgList.toArray())
+    }
+    catch {
       case e: ParseException =>
         System.err.println("Parsing failed.  Reason: " + e.getMessage)
-        System.exit(1)
+        None
     }
   }
 

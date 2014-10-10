@@ -133,7 +133,6 @@ object PetStoreApp{
   }
 
   def main(args: Array[String]) {
-
     new PetStore;
   }
 
