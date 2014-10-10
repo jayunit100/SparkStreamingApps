@@ -29,9 +29,9 @@ object Collect {
     "--intervals","1",
     "--partitions","1",
   "twitter4j.oauth.consumerKey","scnGvGpBwNtWu1ztIW2Q",
-  "twitter4j.oauth.consumerSecret","CPFVbwy240gTgpq88FaBpL7nJZ9tZW4dsMGHnQmIYU",
-  "twitter4j.oauth.accessToken","312897818-LwyhlLe7vSUG3W8Kwm75v5bWHU6lQ779OflzAUkY",
-  "twitter4j.oauth.accessTokenSecret","JQfwRojeNbirTv75QFzj0TedCS7IGRuAeT304hBb7kSj4"
+  "twitter4j.oauth.consumerSecret","",
+  "twitter4j.oauth.accessToken","",
+  "twitter4j.oauth.accessTokenSecret",""
 
   )
 
