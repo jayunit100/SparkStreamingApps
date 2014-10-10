@@ -8,6 +8,9 @@ import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.api.java.{JavaReceiverInputDStream, JavaDStream, JavaStreamingContext}
 import org.apache.spark.streaming.dstream.{ReceiverInputDStream, DStream}
 
+/**
+ * Moddified and borrowed from databricks spark tutorial.
+ */
 object TwitterUtilsJ {
   /**
    * Create a input stream that returns tweets received from Twitter.

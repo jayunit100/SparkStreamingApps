@@ -28,8 +28,13 @@ object Collect {
     "--outputDirectory","/tmp/OUTPUT_"+System.currentTimeMillis(),
     "--numtweets","10",
     "--intervals","1",
-    "--partitions","1"
-    )
+    "--partitions","1",
+  "twitter4j.oauth.consumerKey","scnGvGpBwNtWu1ztIW2Q",
+  "twitter4j.oauth.consumerSecret","CPFVbwy240gTgpq88FaBpL7nJZ9tZW4dsMGHnQmIYU",
+  "twitter4j.oauth.accessToken","312897818-LwyhlLe7vSUG3W8Kwm75v5bWHU6lQ779OflzAUkY",
+  "twitter4j.oauth.accessTokenSecret","JQfwRojeNbirTv75QFzj0TedCS7IGRuAeT304hBb7kSj4"
+
+  )
 
   def main(args: Array[String]) {
     System.out.println("START")
@@ -91,7 +96,6 @@ object Collect {
 
     val tweetStream = TwitterUtilsJ.createStream(ssc, Utils.getAuth,  Seq("medical"), StorageLevel.DISK_ONLY)
       .map(gson.toJson(_))
-      // TODO(vida): Remove this workaround when SPARK-3390 is fixed.
       .filter(!_.contains("boundingBoxCoordinates"))
 
     var checks = 0;

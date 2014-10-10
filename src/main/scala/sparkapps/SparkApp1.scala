@@ -43,8 +43,4 @@ object SparkApp1 {
         }
       }
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 2b5e673939fe2c3b7e5c108ddf24e4b18ec93fee

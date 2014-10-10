@@ -6,6 +6,9 @@ import org.apache.spark.mllib.feature.HashingTF
 import twitter4j.auth.OAuthAuthorization
 import twitter4j.conf.ConfigurationBuilder
 
+/**
+ * Moddified and borrowed from databricks spark tutorial.
+ */
 object Utils {
 
   val numFeatures = 1000
