@@ -2,7 +2,6 @@ package sparkapps
 
 import java.io.File
 
-import sparkapps.Utils
 import com.google.gson.Gson
 import com.google.gson._
 import org.apache.spark.storage.StorageLevel
@@ -99,7 +98,6 @@ object Collect {
       .filter(!_.contains("boundingBoxCoordinates"))
 
     var checks = 0;
-
 
     tweetStream.foreachRDD((rdd, time) => {
       System.out.println("RDD " + checks + " " + rdd.count());
