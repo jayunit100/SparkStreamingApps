@@ -20,18 +20,18 @@ object SparkApp1 {
 
     val sc = new SparkContext(conf)
 
-    val logData = sc.textFile(logFile, 2).cache()
+      val logData = sc.textFile(logFile, 2).cache()
 
-    val numAs =
-      logData.filter(line => line.contains("a")).count()
+      val numAs =
+        logData.filter(line => line.contains("a")).count()
 
-    val numBs =
-      logData.filter(line => line.contains("b")).count()
+      val numBs =
+        logData.filter(line => line.contains("b")).count()
 
-    val piped = logData.pipe("grep a").collect();
+      val piped = logData.pipe("grep a").collect();
 
-    println("Lines with a: %s, Lines with b: %s".format(numAs, numBs))
-  }
+      println("Lines with a: %s, Lines with b: %s".format(numAs, numBs))
+    }
 
 
   def main(args: Array[String]) {
@@ -43,4 +43,8 @@ object SparkApp1 {
         }
       }
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 2b5e673939fe2c3b7e5c108ddf24e4b18ec93fee
