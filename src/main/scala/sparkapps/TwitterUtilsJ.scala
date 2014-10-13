@@ -29,6 +29,7 @@ object TwitterUtilsJ {
                     storageLevel: StorageLevel = StorageLevel.MEMORY_AND_DISK_SER_2
                     ): ReceiverInputDStream[Status] = {
     new TwitterInputDStreamJ(ssc, twitterAuth, filters, storageLevel)
+
   }
 
   /**

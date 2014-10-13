@@ -8,7 +8,7 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.twitter.TwitterUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
-
+import scala.runtime.ScalaRunTime._
 /**
  * Collect at least the specified number of tweets into json text files.
  */
@@ -26,12 +26,12 @@ object Collect {
   private var defaults = Array(
     "--outputDirectory","/tmp/OUTPUT_"+System.currentTimeMillis(),
     "--numtweets","10",
-    "--intervals","1",
+    "--intervals","10", //seconds
     "--partitions","1",
-  "twitter4j.oauth.consumerKey","scnGvGpBwNtWu1ztIW2Q",
-  "twitter4j.oauth.consumerSecret","",
-  "twitter4j.oauth.accessToken","",
-  "twitter4j.oauth.accessTokenSecret",""
+  "twitter4j.oauth.consumerKey","wN0sromtcvjpLNi6vBW8zvYwM",
+  "twitter4j.oauth.consumerSecret","qv4YfD43XXWCpIhKon5sIuFGApj6jZRiB0PwSrIfxT3Ap3WXAd",
+  "twitter4j.oauth.accessToken","312897818-LwyhlLe7vSUG3W8Kwm75v5bWHU6lQ779OflzAUkY",
+  "twitter4j.oauth.accessTokenSecret","JQfwRojeNbirTv75QFzj0TedCS7IGRuAeT304hBb7kSj4"
 
   )
 
@@ -93,29 +93,41 @@ object Collect {
     val ssc = new StreamingContext(sc, Seconds(intervalSecs))
 
 
-    val tweetStream = TwitterUtilsJ.createStream(ssc, Utils.getAuth,  Seq("medical"), StorageLevel.DISK_ONLY)
+    val tweetStream = TwitterUtilsJ.createStream(
+      ssc,
+      Utils.getAuth,
+      Seq("medical"),
+      StorageLevel.MEMORY_ONLY_2)
       .map(gson.toJson(_))
-      .filter(!_.contains("boundingBoxCoordinates"))
+      .filter(!_.contains("boundingBoxCoordinates"))//some kind of spark jira to fix this.
 
     var checks = 0;
 
-    tweetStream.foreachRDD((rdd, time) => {
-      System.out.println("RDD " + checks + " " + rdd.count());
+    tweetStream.foreachRDD((rdd,lent)=> {
+//      tweetStream.repartition(1)
+//      tweetStream.foreachRDD((rdd, time) => {
+       numTweetsCollected+=1;
       val count = rdd.count()
-      checks += 1;
-      if (checks > 20)
-        ssc.stop()
-      //tweetStream.context.stop();
+      System.out.println("RDDS = " + count)
 
+      //numTweetsCollected+=rdd.collect().length;
+      checks += 1;
+      if (checks > 20) {
+        System.out.println("STOPPING CONTEXT !!!!!!!!!!!! ")
+        ssc.stop()
+      }
+      //tweetStream.context.stop();
+        System.out.println("COLLECTED " + numTweetsCollected);
+     //   System.out.println(stringOf("RDD :::: " + rdd.collect()));
         if (numTweetsCollected > numTweetsToCollect) {
-          System.exit(0)
+          System.out.println("EXIT 0 ")
+           System.exit(0)
         }
 
         if (numTweetsCollected > numTweetsToCollect) {
           System.out.println("done collecting all " + numTweetsCollected + " tweets");
           tweetStream.context.stop();
         }
-        System.out.println("COLLECTED " + numTweetsCollected);
     })
 
     ssc.start()

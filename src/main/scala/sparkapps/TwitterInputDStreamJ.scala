@@ -1,4 +1,13 @@
 package sparkapps
+
+import java.nio.ByteBuffer
+
+import org.apache.ctakes.core.fsm.token.BaseToken
+import org.apache.uima.analysis_engine.AnalysisEngineDescription
+import org.apache.uima.jcas.JCas
+import org.uimafit.factory.JCasFactory
+import org.uimafit.pipeline.SimplePipeline
+import org.uimafit.util.JCasUtil
 import twitter4j._
 import twitter4j.auth.Authorization
 import twitter4j.conf.ConfigurationBuilder
@@ -9,6 +18,7 @@ import org.apache.spark.streaming.dstream._
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.Logging
 import org.apache.spark.streaming.receiver.Receiver
+
 
   /* A stream of Twitter statuses, potentially filtered by one or more keywords.
   *
@@ -25,6 +35,15 @@ class TwitterInputDStreamJ(
                              filters: Seq[String],
                              storageLevel: StorageLevel
                              ) extends ReceiverInputDStream[Status](ssc_) {
+
+    object INSTANCES {
+        var instances=0;
+    }
+
+    override def slideDuration(): Duration = {
+      //System.out.println("DURATION = 30 seconds.");
+      return Seconds(100)
+    }
 
     private def createOAuthAuthorization(): Authorization = {
       new OAuthAuthorization(new ConfigurationBuilder().build())
@@ -44,11 +63,16 @@ class TwitterInputDStreamJ(
                          ) extends Receiver[Status](storageLevel) with Logging {
 
     private var twitterStream: TwitterStream = _
-
-
+    var total=0;
     override def store(status:Status): Unit = {
+      // Create a ByteBuffer using a byte array
+      for(x <- 1 until 1000){
+        total+=1;
+       // System.out.println(total + " Storing buffer " + status.getText);
+        val buffer = ByteBuffer.wrap(status.getText.getBytes());
+        super.store(buffer)
 
-        System.out.println("Storing " + status.getText);
+      }
 
     }
 
@@ -57,7 +81,7 @@ class TwitterInputDStreamJ(
         val newTwitterStream = new TwitterStreamFactory().getInstance(twitterAuth)
         newTwitterStream.addListener(new StatusListener {
           def onStatus(status: Status) = {
-            store(status)
+              store(status)
           }
 
           def onDeletionNotice(statusDeletionNotice: StatusDeletionNotice) {}
@@ -82,9 +106,12 @@ class TwitterInputDStreamJ(
           newTwitterStream.sample()
         }
         setTwitterStream(newTwitterStream)
+
         logInfo("Twitter receiver started")
-      } catch {
-        case e: Exception => restart("Error starting Twitter stream", e)
+      }
+      catch {
+        case e: Exception =>
+          restart("Error starting Twitter stream", e)
       }
     }
 

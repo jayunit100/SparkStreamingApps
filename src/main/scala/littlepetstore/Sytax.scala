@@ -45,11 +45,11 @@ object Sytax {
     //now, we can use FreeUser / PremiumUser to do pattern matching against
     //a newly defined  user.  The user
     val xx = user match {
-      case u @ premiumCandidate => "hi, you could be premium!"
+     // case u @ premiumCandidate => "hi, you could be premium!"
       case FreeUser(name) => "hi..." + name + " you are mediocre.  someday you can be premium.";
       case PremiumUser(name) => "Dear Premium User " + name + ". Hello . You are special !";
     }
     print(xx);
 
-  } g
+  }
 }
