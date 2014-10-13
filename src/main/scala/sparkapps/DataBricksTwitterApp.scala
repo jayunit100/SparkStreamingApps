@@ -30,8 +30,8 @@ object Collect {
     "--partitions","1",
   "twitter4j.oauth.consumerKey","wN0sromtcvjpLNi6vBW8zvYwM",
   "twitter4j.oauth.consumerSecret","qv4YfD43XXWCpIhKon5sIuFGApj6jZRiB0PwSrIfxT3Ap3WXAd",
-  "twitter4j.oauth.accessToken","312897818-LwyhlLe7vSUG3W8Kwm75v5bWHU6lQ779OflzAUkY",
-  "twitter4j.oauth.accessTokenSecret","JQfwRojeNbirTv75QFzj0TedCS7IGRuAeT304hBb7kSj4"
+  "twitter4j.oauth.accessToken","",
+  "twitter4j.oauth.accessTokenSecret",""
 
   )
 
