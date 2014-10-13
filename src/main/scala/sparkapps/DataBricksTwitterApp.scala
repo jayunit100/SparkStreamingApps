@@ -27,12 +27,7 @@ object Collect {
     "--outputDirectory","/tmp/OUTPUT_"+System.currentTimeMillis(),
     "--numtweets","10",
     "--intervals","10", //seconds
-    "--partitions","1",
-  "twitter4j.oauth.consumerKey","wN0sromtcvjpLNi6vBW8zvYwM",
-  "twitter4j.oauth.consumerSecret","qv4YfD43XXWCpIhKon5sIuFGApj6jZRiB0PwSrIfxT3Ap3WXAd",
-  "twitter4j.oauth.accessToken","",
-  "twitter4j.oauth.accessTokenSecret",""
-
+    "--partitions","1", 
   )
 
   def main(args: Array[String]) {
