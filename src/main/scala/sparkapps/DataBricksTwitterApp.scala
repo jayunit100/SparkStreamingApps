@@ -27,8 +27,8 @@ object Collect {
     "--outputDirectory","/tmp/OUTPUT_"+System.currentTimeMillis(),
     "--numtweets","10",
     "--intervals","10", //seconds
-    "--partitions","1",
-  
+    "--partitions","1"
+
   )
 
   def main(args: Array[String]) {
