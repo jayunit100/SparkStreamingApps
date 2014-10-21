@@ -27,7 +27,11 @@ object Collect {
     "--outputDirectory","/tmp/OUTPUT_"+System.currentTimeMillis(),
     "--numtweets","10",
     "--intervals","10", //seconds
-    "--partitions","1"
+    "--partitions","1",
+  "twitter4j.oauth.consumerKey","BOOPaRQKA8Gu8GjkHn4OaJsB0",
+  "twitter4j.oauth.consumerSecret","7jDPx1pdKEBe0dlAt5561M4k2Xn3j97e7ZTWvEAwhaKNl2cYvw",
+  "twitter4j.oauth.accessToken","312897818-a6vB0wI9HBWV3kmYY9J6ccBuQ2XvoNfVkfdt1rYp",
+  "twitter4j.oauth.accessTokenSecret","6gBUDqg116aLHN9Yi3K5mVBCxNlZoLB7JzX25NY3DTG0A"
 
   )
 
@@ -93,9 +97,9 @@ object Collect {
       ssc,
       Utils.getAuth,
       Seq("medical"),
-      StorageLevel.MEMORY_ONLY_2)
-      .map(gson.toJson(_))
-      .filter(!_.contains("boundingBoxCoordinates"))//some kind of spark jira to fix this.
+      StorageLevel.MEMORY_ONLY)
+        .map(gson.toJson(_))
+        //  .filter(!_.contains("boundingBoxCoordinates"))//some kind of spark jira to fix this.
 
     var checks = 0;
 
