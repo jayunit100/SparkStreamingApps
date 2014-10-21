@@ -25,7 +25,7 @@ object Collect {
   private var gson = new Gson()
   private var defaults = Array(
     "--outputDirectory","/tmp/OUTPUT_"+System.currentTimeMillis(),
-    "--numtweets","10",
+    "--numtweets","1000",
     "--intervals","10", //seconds
     "--partitions","1",
   "twitter4j.oauth.consumerKey","BOOPaRQKA8Gu8GjkHn4OaJsB0",
@@ -104,12 +104,13 @@ object Collect {
     var checks = 0;
 
     tweetStream.foreachRDD((rdd,lent)=> {
-//      tweetStream.repartition(1)
-//      tweetStream.foreachRDD((rdd, time) => {
-       numTweetsCollected+=1;
-      val count = rdd.count()
-      System.out.println("RDDS = " + count)
+      System.out.println("REPARTITION " )
+      tweetStream.repartition(1)
+      System.out.println("///////////////// REPARTITION " )
 
+      numTweetsCollected+=1;
+      //val count = rdd.count()
+      //System.out.println("RDDS = " + count)
       //numTweetsCollected+=rdd.collect().length;
       checks += 1;
       if (checks > 20) {
