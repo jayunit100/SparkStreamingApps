@@ -149,10 +149,6 @@ class TwitterInputDStreamJ(
     @volatile var stopped = false;
     override def onStart()= {
       System.out.println("*************STARTING*******************")
-      System.out.println("*************STARTING*******************")
-      System.out.println("*************STARTING*******************")
-      System.out.println("*************STARTING*******************")
-      System.out.println("*************STARTING*******************")
 
       stopped=false;
       val future =
