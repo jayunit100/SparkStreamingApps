@@ -29,9 +29,9 @@ object Driver {
     "--intervals","10", //seconds
     "--partitions","1",
   "twitter4j.oauth.consumerKey","BOOPaRQKA8Gu8GjkHn4OaJsBx0",
-  "twitter4j.oauth.consumerSecret","7jDPx1pdKEBe0dlAt5561M4k2Xn3j97e7ZTWvEAwhaKNl2cYvxw",
-  "twitter4j.oauth.accessToken","312897818-a6vB0wI9HBWV3kmYY9J6ccBuQ2XvoNfVkfdt1rYxp",
-  "twitter4j.oauth.accessTokenSecret","6gBUDqg116aLHN9Yi3K5mVBCxNlZoLB7JzX25NY3DTG0xA"
+  "twitter4j.oauth.consumerSecret","XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx",
+  "twitter4j.oauth.accessToken","312897818-a6vB0wI9HBWV3kmYY9J6ccBuQ2XvoNfVkfdt1rYp",
+  "twitter4j.oauth.accessTokenSecret","6gBUDqg116aLHN9Yi3K5mVBCxNlZoLB7JzX25NY3DTG0A"
   )
 
   def main(args: Array[String]) {
