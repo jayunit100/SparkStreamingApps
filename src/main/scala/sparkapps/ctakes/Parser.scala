@@ -1,13 +1,10 @@
-package sparkapps
+package sparkapps.ctakes
 
-import scala.collection.SortedMap
 import scala.collection.immutable._;
 /**
  * Created by jay on 10/9/14.
  */
 object Parser {
-
-
 
   val usage =
     """
