@@ -31,7 +31,7 @@ object Driver {
   "twitter4j.oauth.consumerKey","BOOPaRQKA8Gu8GjkHn4OaJsBx0",
   "twitter4j.oauth.consumerSecret","XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx",
   "twitter4j.oauth.accessToken","312897818-a6vB0wI9HBWV3kmYY9J6ccBuQ2XvoNfVkfdt1rYp",
-  "twitter4j.oauth.accessTokenSecret","6gBUDqg116aLHN9Yi3K5mVBCxNlZoLB7JzX25NY3DTG0A"
+  "twitter4j.oauth.accessTokenSecret","XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
   )
 
   def main(args: Array[String]) {
