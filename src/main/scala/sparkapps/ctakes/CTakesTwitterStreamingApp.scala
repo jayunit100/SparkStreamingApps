@@ -34,11 +34,12 @@ object Driver {
     def read(param:String):Option[String]= {
       scala.io.Source.fromFile("/tmp/twitter").getLines().foreach {
         x =>
+          System.out.println("line : " + x)
           if (! x.contains("=")){
             System.err.println("MAJOR failure.  Bad line " +x + " in /tmp/twitter.")
           }
           else if (x.contains(param)) {
-            return Some(x.split("=")(2));
+            return Some(x.split("=")(1));
           }
       }
       System.err.println("Uhoh ! Didnt see the twitter param in /tmp/twitter for " + twitterParam );

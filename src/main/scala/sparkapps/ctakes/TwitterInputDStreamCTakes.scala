@@ -103,6 +103,7 @@ class TwitterInputDStreamCTakes(
           new Runnable() {
             def run() = {
               try {
+                System.out.println("Consumer k = " + System.getProperty("twitter4j.oauth.consumerKey"))
                 val newTwitterStream = new TwitterStreamFactory().getInstance(twitterAuth)
                 newTwitterStream.addListener(statusListener)
 

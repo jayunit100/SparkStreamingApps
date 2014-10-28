@@ -28,7 +28,8 @@ object Parser {
       case "--numtweets" :: value :: tail => nextOption(map++Map("numtweets"->value),tail)
       case "--intervals" :: value :: tail => nextOption(map++Map("interval"->value),tail)
       case "--partitions" :: value :: tail => nextOption(map++Map("partitions"->value),tail)
-      case unknown :: value :: tail => System.out.println("Setting sys prop " + unknown + " "+value)
+      case unknown :: value :: tail =>
+        System.out.println("Setting sys prop " + unknown + " "+value)
         System.setProperty(unknown,value)
         nextOption(map,tail)
     }
