@@ -11,7 +11,7 @@ import org.apache.spark.streaming.dstream.{ReceiverInputDStream, DStream}
 /**
  * Moddified and borrowed from databricks spark tutorial.
  */
-object TwitterUtilsJ {
+object TwitterUtilsCtakes {
   /**
    * Create a input stream that returns tweets received from Twitter.
    * @param ssc         StreamingContext object
@@ -27,8 +27,10 @@ object TwitterUtilsJ {
                     twitterAuth: Option[Authorization],
                     filters: Seq[String] = Nil,
                     storageLevel: StorageLevel = StorageLevel.MEMORY_AND_DISK_SER_2
-                    ): ReceiverInputDStream[Status] = {
-    new TwitterInputDStreamJ(ssc, twitterAuth, filters, storageLevel)
+                    ): ReceiverInputDStream[Status] =
+  {
+    //2 second slide duratoin
+    new TwitterInputDStreamCtakes(ssc, twitterAuth, filters, storageLevel, 2)
 
   }
 

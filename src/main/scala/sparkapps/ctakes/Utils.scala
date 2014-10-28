@@ -1,8 +1,11 @@
 package sparkapps.ctakes
 
+import java.util.Date
+
 import org.apache.commons.cli.{Options, ParseException, PosixParser}
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.feature.HashingTF
+import twitter4j._
 import twitter4j.auth.OAuthAuthorization
 import twitter4j.conf.ConfigurationBuilder
 
@@ -10,23 +13,6 @@ import twitter4j.conf.ConfigurationBuilder
  * Moddified and borrowed from databricks spark tutorial.
  */
 object Utils {
-
-  val numFeatures = 1000
-  val tf = new HashingTF(numFeatures)
-
-  val CONSUMER_KEY = "consumerKey"
-  val CONSUMER_SECRET = "consumerSecret"
-  val ACCESS_TOKEN = "accessToken"
-  val ACCESS_TOKEN_SECRET = "accessTokenSecret"
-
-  val THE_OPTIONS = {
-    val options = new Options()
-    options.addOption(CONSUMER_KEY, true, "Twitter OAuth Consumer Key")
-    options.addOption(CONSUMER_SECRET, true, "Twitter OAuth Consumer Secret")
-    options.addOption(ACCESS_TOKEN, true, "Twitter OAuth Access Token")
-    options.addOption(ACCESS_TOKEN_SECRET, true, "Twitter OAuth Access Token Secret")
-    options
-  }
 
   /**
    * Test several arguments.
@@ -60,33 +46,6 @@ object Utils {
      System.exit(2)
   }
 
-  /**
-   * Modifications...
-   */
-  def parseCommandLineWithTwitterCredentials(args: Array[String]) : Option[Array[AnyRef]] = {
-    val parser = new PosixParser
-    try {
-      val cl = parser.parse(THE_OPTIONS, args)
-      /**
-       * Parse twitter args and put them on system properties.
-       */
-      System.setProperty("twitter4j.oauth.consumerKey", cl.getOptionValue(CONSUMER_KEY))
-      System.setProperty("twitter4j.oauth.consumerSecret", cl.getOptionValue(CONSUMER_SECRET))
-      System.setProperty("twitter4j.oauth.accessToken", cl.getOptionValue(ACCESS_TOKEN))
-      System.setProperty("twitter4j.oauth.accessTokenSecret", cl.getOptionValue(ACCESS_TOKEN_SECRET))
-      System.out.println("Returning " + cl.getArgList.toArray());
-      /**
-       * Return the rest of the arguments as a list.
-       */
-      Some(cl.getArgList.toArray())
-    }
-    catch {
-      case e: ParseException =>
-        System.err.println("Parsing failed.  Reason: " + e.getMessage)
-        None
-    }
-  }
-
   def getAuth = {
     Some(new OAuthAuthorization(new ConfigurationBuilder().build()))
   }
@@ -109,6 +68,69 @@ object Utils {
       } catch {
         case e: NumberFormatException => None
       }
+    }
+  }
+
+
+  /**
+   * A Mock status object for testing twitter streaming w/o
+   * actually connecting to twitter.
+   */
+  def mockStatus: Status = {
+    new Status {
+
+      override def getPlace: Place = ???
+
+      override def isRetweet: Boolean = ???
+
+      override def isFavorited: Boolean = ???
+
+      override def getCreatedAt: Date = ???
+
+      override def getUser: User = ???
+
+      override def getContributors: Array[Long] = ???
+
+      override def getRetweetedStatus: Status = ???
+
+      override def getInReplyToScreenName: String = "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+
+      override def isTruncated: Boolean = ???
+
+      override def getId: Long = ???
+
+      override def getCurrentUserRetweetId: Long = ???
+
+      override def isPossiblySensitive: Boolean = ???
+
+      override def getRetweetCount: Long = ???
+
+      override def getGeoLocation: GeoLocation = ???
+
+      override def getInReplyToUserId: Long = ???
+
+      override def getSource: String = System.currentTimeMillis()+"SADFSADFASDFSDFSDFFffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+
+      override def getText: String = "ASDFsdofaidsjofaisjdofiajsdofijadsfASDFsdofaidsjofaisjdofiajsdofijadsfASDFsdofaidsjofaisjdofiajsdofijadsfASDFsdofaidsjofaisjdofiajsdofijadsf"+System.currentTimeMillis()
+
+      override def getInReplyToStatusId: Long = ???
+
+      override def isRetweetedByMe: Boolean = ???
+
+      override def compareTo(p1: Status): Int = ???
+
+      override def getHashtagEntities: Array[HashtagEntity] = ???
+
+      override def getURLEntities: Array[URLEntity] = ???
+
+      override def getMediaEntities: Array[MediaEntity] = ???
+
+      override def getUserMentionEntities: Array[UserMentionEntity] = ???
+
+      override def getAccessLevel: Int = ???
+
+      override def getRateLimitStatus: RateLimitStatus = ???
+
     }
   }
 }

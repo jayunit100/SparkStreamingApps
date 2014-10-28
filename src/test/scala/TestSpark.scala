@@ -5,7 +5,7 @@ import sparkapps.SparkApp1
 /**
  * Created by apache on 7/20/14.
  */
-class Tester {
+class TestSpark {
 
   @org.junit.Test
   def test(){

@@ -26,7 +26,7 @@ import scala.collection.JavaConverters._
 
 object CTakesExample {
 
-    def getDefaultPipeline():AnalysisEngine  = {
+  def getDefaultPipeline():AnalysisEngine  = {
       var builder = new AggregateBuilder
       builder.add(SimpleSegmentAnnotator.createAnnotatorDescription());
       builder.add(org.apache.ctakes.core.ae.SentenceDetector.createAnnotatorDescription());
@@ -40,8 +40,7 @@ object CTakesExample {
       builder.createAggregate()
     }
 
-      def main(args: Array[String]) {
-
+  def main(args: Array[String]) {
         val aed:AnalysisEngine= getDefaultPipeline();
         val jcas:JCas = JCasFactory.createJCas();
         jcas.setDocumentText("The patient is suffering from extreme pain due to shark bite. Recommend continuing use of aspirin, oxycodone, and coumadin. atient denies smoking and chest pain. Patient has no cancer. There is no sign of multiple sclerosis. Continue exercise for obesity and hypertension. ");
@@ -60,6 +59,5 @@ object CTakesExample {
           //System.out.println(entity.toString()) //System.out.println(entity.getCAS) System.out.println(entity.getCoveredText() + " - " + entity.getPartOfSpeech()); }
           System.out.println(entity.getCoveredText + " " + entity.getPartOfSpeech);
         }
-
-      }
+  }
 }

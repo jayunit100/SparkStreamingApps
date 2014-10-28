@@ -1,4 +1,6 @@
-package sparkapps
+package sparkapps.ctakes
+
+
 
 import java.nio.ByteBuffer
 import java.util.Date
@@ -22,6 +24,7 @@ import org.apache.spark.Logging
 import org.apache.spark.streaming.receiver.Receiver
 
 
+
   /* A stream of Twitter statuses, potentially filtered by one or more keywords.
   *
   * @constructor create a new Twitter stream using the supplied Twitter4J authentication credentials.
@@ -31,16 +34,17 @@ import org.apache.spark.streaming.receiver.Receiver
   * If no Authorization object is provided, initializes OAuth authorization using the system
   * properties twitter4j.oauth.consumerKey, .consumerSecret, .accessToken and .accessTokenSecret.
   */
-class TwitterInputDStreamJ(
+class TwitterInputDStreamCTakes(
                              @transient ssc_ : StreamingContext,
                              twitterAuth: Option[Authorization],
                              filters: Seq[String],
-                             storageLevel: StorageLevel
+                             storageLevel: StorageLevel,
+                             slideSeconds: Int
                              ) extends ReceiverInputDStream[Status](ssc_) {
 
     override def slideDuration(): Duration = {
-      System.out.println("checking duration");
-      return Seconds(10)
+      System.out.println("returning duration seconds = " + slideSeconds );
+      return Seconds(slideSeconds)
     }
 
     private def createOAuthAuthorization(): Authorization = {
@@ -66,68 +70,11 @@ class TwitterInputDStreamJ(
         super.store(status)
     }
 
-    def mockStatus: Status = {
-      new Status {override def getPlace: Place = ???
-
-        override def isRetweet: Boolean = ???
-
-        override def isFavorited: Boolean = ???
-
-        override def getCreatedAt: Date = ???
-
-        override def getUser: User = ???
-
-        override def getContributors: Array[Long] = ???
-
-        override def getRetweetedStatus: Status = ???
-
-        override def getInReplyToScreenName: String = "------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
-
-        override def isTruncated: Boolean = ???
-
-        override def getId: Long = ???
-
-        override def getCurrentUserRetweetId: Long = ???
-
-        override def isPossiblySensitive: Boolean = ???
-
-        override def getRetweetCount: Long = ???
-
-        override def getGeoLocation: GeoLocation = ???
-
-        override def getInReplyToUserId: Long = ???
-
-        override def getSource: String = System.currentTimeMillis()+"SADFSADFASDFSDFSDFFffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-
-        override def getText: String = "ASDFsdofaidsjofaisjdofiajsdofijadsfASDFsdofaidsjofaisjdofiajsdofijadsfASDFsdofaidsjofaisjdofiajsdofijadsfASDFsdofaidsjofaisjdofiajsdofijadsf"+System.currentTimeMillis()
-
-        override def getInReplyToStatusId: Long = ???
-
-        override def isRetweetedByMe: Boolean = ???
-
-        override def compareTo(p1: Status): Int = ???
-
-        override def getHashtagEntities: Array[HashtagEntity] = ???
-
-        override def getURLEntities: Array[URLEntity] = ???
-
-        override def getMediaEntities: Array[MediaEntity] = ???
-
-        override def getUserMentionEntities: Array[UserMentionEntity] = ???
-
-        override def getAccessLevel: Int = ???
-
-        override def getRateLimitStatus: RateLimitStatus = ???
-
-      }
-    }
     def statusListener():StatusListener = {
       new StatusListener {
         def onStatus(status: Status) = {
-          System.out.println("Storing 10000 statuses... " + status.getText);
-          for (x <- 1 to 10000) {
+            System.out.println("Tweet  : "+status.getText)
             store(status)
-          }
         }
         def onDeletionNotice(statusDeletionNotice: StatusDeletionNotice) {}
 
@@ -148,24 +95,14 @@ class TwitterInputDStreamJ(
     }
     @volatile var stopped = false;
     override def onStart()= {
-      System.out.println("*************STARTING*******************")
-
+      logInfo("Wating 5 seconds to start to prevent abuse.")
+      Thread.sleep(5000)
       stopped=false;
       val future =
         new Thread(
           new Runnable() {
             def run() = {
               try {
-                /**
-               for(x <- 1 until 1000) {
-                 if(x%100==0){
-                   System.out.println("status " + x);
-                   //stop("killing..");
-                 }
-                 store(mockStatus);
-               }
-                  **/
-
                 val newTwitterStream = new TwitterStreamFactory().getInstance(twitterAuth)
                 newTwitterStream.addListener(statusListener)
 
@@ -188,17 +125,12 @@ class TwitterInputDStreamJ(
             }
           });
 
-      System.out.println("STARTING.................")
       future.start();
-      System.out.println("FUTURE RETURNING.................")
     }
 
     def onStop() {
       stopped=true;
       setTwitterStream(null)
-      logInfo("Twitter receiver stopped")
-      logInfo("Wating 10 seconds, to prevent abuse.")
-      Thread.sleep(10000)
     }
 
     private def setTwitterStream(newTwitterStream: TwitterStream) = synchronized {

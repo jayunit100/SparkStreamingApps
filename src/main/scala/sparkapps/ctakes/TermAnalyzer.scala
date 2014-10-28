@@ -36,6 +36,7 @@ object CtakesTermAnalyzer {
     builder.createAggregate()
   }
 
+
   def analyze(text:String):Any = {
     val aed:AnalysisEngine= getDefaultPipeline();
     val jcas:JCas = JCasFactory.createJCas();
@@ -45,7 +46,10 @@ object CtakesTermAnalyzer {
     while(iter.hasNext)
     {
       val entity = iter.next();
+      //for demonstration purposes , we print all this stuff.
       System.out.print("---"+entity.getCoveredText + " " + entity.getPartOfSpeech+"---");
     }
+    //return the iterator.
+    JCasUtil.select(jcas,classOf[BaseToken]).iterator()
   }
 }
