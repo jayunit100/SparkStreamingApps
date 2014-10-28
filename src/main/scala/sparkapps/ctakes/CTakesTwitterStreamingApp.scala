@@ -77,7 +77,7 @@ object Driver {
     if(args.length==0) {
       val defs = Array(
         "--outputDirectory", "/tmp/OUTPUT_" + System.currentTimeMillis(),
-        "--numtweets", "1000",
+        "--numtweets", "10",
         "--intervals", "10",
         "--partitions", "1",
         //added as system properties.
@@ -170,7 +170,7 @@ object Driver {
       val outputRDD = rdd.repartition(partitionsEachInterval)
       System.out.println(rdd.count());
       numTweetsCollected += rdd.count()
-
+      System.out.println("\n\n\n PROGRESS ::: "+numTweetsCollected + " so far, out of " + numTweetsToCollect + " \n\n\n ");
       if (numTweetsCollected > numTweetsToCollect) {
           ssc.stop()
           sc.stop();
