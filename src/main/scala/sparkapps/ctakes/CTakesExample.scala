@@ -27,7 +27,7 @@ import scala.collection.JavaConverters._
 object CTakesExample {
 
   def getDefaultPipeline():AnalysisEngine  = {
-      var builder = new AggregateBuilder
+      val builder = new AggregateBuilder
       builder.add(SimpleSegmentAnnotator.createAnnotatorDescription());
       builder.add(org.apache.ctakes.core.ae.SentenceDetector.createAnnotatorDescription());
       builder.add(TokenizerAnnotatorPTB.createAnnotatorDescription());
@@ -50,13 +50,10 @@ object CTakesExample {
         //Print out the tokens and Parts of Speech
 
         val iter = JCasUtil.select(jcas,classOf[BaseToken]).iterator()
-        //val iter = JCasUtil.select(jcas, classOf[BaseToken]).iterator()
-        //val iter = JCasUtil.selectAll(jcas).iterator();
         System.out.println(iter.hasNext);
         while(iter.hasNext)
         {
           val entity = iter.next();
-          //System.out.println(entity.toString()) //System.out.println(entity.getCAS) System.out.println(entity.getCoveredText() + " - " + entity.getPartOfSpeech()); }
           System.out.println(entity.getCoveredText + " " + entity.getPartOfSpeech);
         }
   }

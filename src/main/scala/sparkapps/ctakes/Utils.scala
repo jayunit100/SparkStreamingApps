@@ -15,10 +15,9 @@ import twitter4j.conf.ConfigurationBuilder
 object Utils {
 
   /**
-   * Test several arguments.
-   * Partially this is an experiment w/ scala syntax :)
-   * If any tests fail, an error condition is called.
-   * At the end, if failure, the System exits.
+   * Glue code for declarative testing of args. See impl example in Driver class.
+   * verifies that each input in the string passes the tester function.
+   * prints error and exists if not.
    */
   def checkpoint(
                   tester : Any => Boolean,

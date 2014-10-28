@@ -20,13 +20,59 @@ object Driver {
   private var partNum = 0
   private var gson = new Gson()
 
+  /**
+   * Maintain twitter credentials in a /tmp/twitter file.
+   * @param twitterParam
+   * @return
+   */
+  def readParameter(twitterParam:String) : Option[String] = {
+    if(! new File("/tmp/twitter").exists()){
+      System.err.println("MAJOR failure.  No /tmp/twitter file exists.")
+      None;
+    }
+    //find the parameter in /tmp/twitter.
+    def read(param:String):Option[String]= {
+      scala.io.Source.fromFile("/tmp/twitter").getLines().foreach {
+        x =>
+          if (! x.contains("=")){
+            System.err.println("MAJOR failure.  Bad line " +x + " in /tmp/twitter.")
+          }
+          else if (x.contains(param)) {
+            return Some(x.split("=")(2));
+          }
+      }
+      System.err.println("Uhoh ! Didnt see the twitter param in /tmp/twitter for " + twitterParam );
+      None
+    }
 
+    //just return it for now , in future maybe we'll handle errors by prompting user.
+    val x = read(twitterParam);
+    x match {
+      case Some(x) => return Some(x);
+      case None => {
+       //FUTURE : Prompt user for this parameter.
+       return None;
+      }
+    }
+  }
   /**
    * Input= --outputDirectory --numtweets --intervals --partitions
    * Output= outputdir numtweets  intervals partitions consumerKey consumerSecret accessToken accessTokenSecret
    */
   def main(args: Array[String]) {
-    System.out.println("START")
+    def failTwFile() = {
+      System.err.println("FAILURE to read values from /tmp/twitter credentials. ")
+      System.err.println("Please write a k/v file like this:")
+      System.err.println("consumerKey=xxx")
+      System.err.println("consumerSecret=yyy")
+      System.err.println("accessToken=zzz")
+      System.err.println("accessTokenSecret=aaa")
+      System.err.println("To /tmp/twitter, and restart this app.")
+      System.exit(2)
+    }
+
+    System.out.println("START:  Put consumerkey,consumer_secret,access_token,access_token_secret in /tmp/twitter, " +
+      "or it will be written for you interactively....")
     if(args.length==0) {
       val defs = Array(
         "--outputDirectory", "/tmp/OUTPUT_" + System.currentTimeMillis(),
@@ -34,10 +80,11 @@ object Driver {
         "--intervals", "10",
         "--partitions", "1",
         //added as system properties.
-        "twitter4j.oauth." + Parser.CONSUMER_KEY, "BOOPaRQKA8Gu8GjkHn4OaJsBx0",
-        "twitter4j.oauth." + Parser.CONSUMER_SECRET, "",
-        "twitter4j.oauth." + Parser.ACCESS_TOKEN, "",
-        "twitter4j.oauth." + Parser.ACCESS_TOKEN_SECRET, "");
+        /** qoute at the end is for type inference **/
+        "twitter4j.oauth." + Parser.CONSUMER_KEY, readParameter(Parser.CONSUMER_KEY).getOrElse({failTwFile(); ""}),
+        "twitter4j.oauth." + Parser.CONSUMER_SECRET, readParameter(Parser.CONSUMER_SECRET).getOrElse({failTwFile(); ""}),
+        "twitter4j.oauth." + Parser.ACCESS_TOKEN, readParameter(Parser.ACCESS_TOKEN).getOrElse({failTwFile() ; ""}),
+        "twitter4j.oauth." + Parser.ACCESS_TOKEN_SECRET, readParameter(Parser.ACCESS_TOKEN_SECRET).getOrElse({failTwFile(); ""}));
 
       //TODO clean up this.  Could lead to infinite recursion.
       System.err.println("Usage: " + this.getClass.getSimpleName + " executing w/ default options ! " + defs)
@@ -60,13 +107,30 @@ object Driver {
     verifyAndRun(intervalSecs,numTweetsToCollect, new File(outputDirectory), partitionsEachInterval);
   }
 
-  def verifyAndRun(intervalSecs:Int, numTweetsToCollect:Int, outputDirectory:File, partitionsEachInterval:Int) = {
-    val props = (
+  def verify() = {
+    /**
+     * Checkpoint confirms that each system property exists.
+     */
+    Utils.checkpoint(
+    //verifier
+    {
+      xp =>
+        System.getProperty(xp.toString) != null;
+    },
+    //error messages.
+    {
+      xp => System.err.println("Failure: " + xp)
+    },
+    //properties to be verified.
+    List(
       "twitter4j.oauth.consumerKey",
       "twitter4j.oauth.consumerSecret",
       "twitter4j.oauth.accessToken",
-      "twitter4j.oauth.accessTokenSecret"
-      )
+      "twitter4j.oauth.accessTokenSecret")
+    )
+  }
+
+  def verifyAndRun(intervalSecs:Int, numTweetsToCollect:Int, outputDirectory:File, partitionsEachInterval:Int) = {
 
     System.out.println(
       "Params = seconds= " + intervalSecs +
@@ -74,31 +138,12 @@ object Driver {
         " out =" + outputDirectory + ", " +
         " partitions= " + partitionsEachInterval)
 
-    /**
-     * Checkpoint confirms that each property exists.
-     */
-    Utils.checkpoint(
-    {
-      x1 =>
-        var pass = System.getProperty(x1.toString) != null; // Filter function.
-        x1.toString match {
-          case _ if x1.toString.contains("outputDir") => {
-            if (new File(outputDirectory.toString).exists()) {
-              System.err.println("ERROR - %s already exists: delete or specify another directory".format(outputDirectory))
-              pass = false
-            }
-          }
-            //cases for other options.
-            pass
-        }
-    }, {
-      x => System.err.println("Failure: " + x)
-    },
-    List(props._1, props._2, props._3, props._4)
-    )
+    verify();
 
-    val outputDir = new File(outputDirectory.toString)
-
+    if (outputDirectory.exists()) {
+      System.err.println("ERROR - %s already exists: delete or specify another directory".format(outputDirectory))
+      System.exit(2)
+    }
     startStream(intervalSecs,partitionsEachInterval,numTweetsToCollect);
   }
 
@@ -136,7 +181,7 @@ object Driver {
      * This is where we invoke CTakes.  For your CTAkes implementation, you would change the logic here
      * to do something like store results to a file, or do a more sophisticated series of tasks.
      */
-    var stream = tweetStream.map(
+    val stream = tweetStream.map(
       x =>
         System.out.println("processed :::::::::: " + CtakesTermAnalyzer.analyze(x)));
 

@@ -30,7 +30,7 @@ object TwitterUtilsCtakes {
                     ): ReceiverInputDStream[Status] =
   {
     //2 second slide duratoin
-    new TwitterInputDStreamCtakes(ssc, twitterAuth, filters, storageLevel, 2)
+    new TwitterInputDStreamCTakes(ssc, twitterAuth, filters, storageLevel, 2)
 
   }
 
