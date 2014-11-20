@@ -31,49 +31,38 @@ object Processor {
    */
   def startCassandraStream() = {
       val conf = new SparkConf()
-      .setAppName(this.getClass.getSimpleName + "" + System.currentTimeMillis())
-      .setMaster("local[2]")
-      .set("spark.cassandra.connection.host", "127.0.0.1")
-       .set("spark.cassandra.connection.native.port","9042")
-      .set("spark.cassandra.auth.username", "cassandra")
-      .set("spark.cassandra.auth.password", "cassandra")
+        .setAppName(this.getClass.getSimpleName + "" + System.currentTimeMillis())
+        .setMaster("local[2]")
+        .set("spark.cassandra.connection.host", "127.0.0.1")
+        .set("spark.cassandra.connection.native.port","9042")
+        //.set("spark.cassandra.auth.username", "cassandra")
+        //.set("spark.cassandra.auth.password", "cassandra")
 
       CassandraConnector(conf).withSessionDo { session =>
-        System.out.println("Cassandra 1")
-        // cqlsh --e "CREATE KEYSPACE IF NOT EXISTS streaming_test WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 3 }"
         session.execute(s"CREATE KEYSPACE IF NOT EXISTS streaming_test WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 3 }")
-        System.out.println("Cassandra 2")
         session.execute(s"CREATE TABLE IF NOT EXISTS streaming_test.key_value (key VARCHAR PRIMARY KEY, value INT)")
-        System.out.println("Cassandra 3")
         session.execute(s"TRUNCATE streaming_test.key_value")
       }
-      //now start the stream.
       startStream(conf, 1, 1, 1)
   }
 
   def startStream(sparkConf:SparkConf, intervalSecs:Int, partitionsEachInterval:Int, numTweetsToCollect:Int) = {
-    println("Initializing Streaming Spark Context...")
-
-    println("Initializing Streaming Spark Context... 2")
 
     val sc = new SparkContext(sparkConf)
     val ssc = new StreamingContext(sc, Seconds(intervalSecs))
-    println("Initializing Streaming Spark Context... 3")
 
     val stream  =
       new MockInputDStreamCTakes(total,ssc)
-        .map(gson.toJson(_))
+        .map(gson.toJson(_)) //not required, but keep it around for twitter based examples.
         .filter(!_.
           contains("boundingBoxCoordinates"));
 
     var count = 0;
     println("Initializing Streaming Spark Context... 4")
 
-    //without this, nothing will execute.
+    //Without this, nothing will execute: Streaming context's require an attached consumer to run.
     stream.foreachRDD(rdd => {
-      System.out.println("fir each " + count);
       count+=1
-
       if (count>2) {
         //assumes session.
         CassandraConnector(sparkConf).withSessionDo
@@ -81,19 +70,13 @@ object Processor {
           val xN="n"+System.currentTimeMillis()+count
           val x=1
           Thread.sleep(1)
-          System.out.println("Cassandra 5")
           session.execute(s"INSERT INTO streaming_test.key_value (key, value) VALUES ('$xN' , $x)")
-          System.out.println("Cassandra 6")
         }
-
-        System.out.println("done ; killing.")
         ssc.stop()
         sc.stop();
         System.exit(0)
       }
     })
-
-    //stream.print();
     ssc.start()
     ssc.awaitTermination()}
 
