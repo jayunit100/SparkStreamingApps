@@ -1,7 +1,5 @@
 package sparkapps.ctakes
 
-
-
 import java.nio.ByteBuffer
 import java.util.Date
 import java.util.concurrent.{Callable, FutureTask}
@@ -39,8 +37,7 @@ class TwitterInputDStreamCTakes(
                              twitterAuth: Option[Authorization],
                              filters: Seq[String],
                              storageLevel: StorageLevel,
-                             slideSeconds: Int
-                             ) extends ReceiverInputDStream[Status](ssc_) {
+                             slideSeconds: Int) extends ReceiverInputDStream[Status](ssc_) {
 
     override def slideDuration(): Duration = {
       System.out.println("returning duration seconds = " + slideSeconds );
@@ -94,12 +91,15 @@ class TwitterInputDStreamCTakes(
       }
     }
     @volatile var stopped = false;
-    override def onStart()= {
-      logInfo("Wating 5 seconds to start to prevent abuse.")
-      Thread.sleep(5000)
-      stopped=false;
-      val future =
-        new Thread(
+    
+    
+    /**
+    *  This will need to be injected somehow 
+    *  so that we can have a unit test for confirming
+    *  that the processor works correctly. 
+    */
+    def thread():Thread = {
+        return new Thread(
           new Runnable() {
             def run() = {
               try {
@@ -125,7 +125,13 @@ class TwitterInputDStreamCTakes(
               }
             }
           });
-
+    }
+    
+    override def onStart()= {
+      logInfo("Wating 5 seconds to start to prevent abuse.")
+      Thread.sleep(5000)
+      stopped=false;
+      val future = thread()
       future.start();
     }
 

@@ -157,13 +157,16 @@ object Driver {
     val sc = new SparkContext(conf)
     val ssc = new StreamingContext(sc, Seconds(intervalSecs))
 
+    /**
+    *  
+    */
     val tweetStream = TwitterUtilsCtakes.createStream(
       ssc,
       Utils.getAuth,
       Seq("medical"),
       StorageLevel.MEMORY_ONLY)
         .map(gson.toJson(_))
-        .filter(!_.contains("boundingBoxCoordinates"))//some kind of spark jira to fix this.
+        .filter(!_.contains("boundingBoxCoordinates"))//SPARK-3390
 
     var checks = 0;
     tweetStream.foreachRDD(rdd => {
@@ -184,7 +187,7 @@ object Driver {
      */
     val stream = tweetStream.map(
       x =>
-        System.out.println("processed :::::::::: " + CtakesTermAnalyzer.analyze(x)));
+        System.out.println(" " + CtakesTermAnalyzer.analyze(x)));
 
     stream.print();
     ssc.start()

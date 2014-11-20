@@ -31,7 +31,7 @@ object SparkApp1 {
       val piped = logData.pipe("grep a").collect();
 
       println("Lines with a: %s, Lines with b: %s".format(numAs, numBs))
-    }
+  }
 
   def main(args: Array[String]) {
       if(args.length==0)

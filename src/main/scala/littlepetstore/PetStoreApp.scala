@@ -43,6 +43,7 @@ object PetStoreApp{
 
     //implicit mapper from actor -> actions
     implicit def a2act[T](a: PetStoreActor[T]) = new PetStoreActorActions(a);
+
     //implicit mapper specifically for humans -> actions.
     //this allows us to complain.
     implicit def ha2act[T<:Human](a: PetStoreActor[T]) = new PetStoreHumanActorActions(a);

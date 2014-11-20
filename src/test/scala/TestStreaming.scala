@@ -3,5 +3,9 @@
  */
 class TestStreaming {
 
+  @org.junit.Test
+  def test(){
+    sparkapps.tweetstream.Processor.startCassandraStream()
+  }
 
 }
