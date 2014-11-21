@@ -43,10 +43,36 @@ object Processor {
         session.execute(s"CREATE TABLE IF NOT EXISTS streaming_test.key_value (key VARCHAR PRIMARY KEY, value INT)")
         session.execute(s"TRUNCATE streaming_test.key_value")
       }
-      startStream(conf, 1, 1, 1)
+      startStream(
+      conf,
+        1,1,1,
+        {
+          (transactions,sparkConf) =>
+            //assumes session.
+            CassandraConnector(sparkConf).withSessionDo {
+              session => {
+                val x=1
+                Thread.sleep(1)
+                transactions.foreach(
+                  {xN => session.execute(s"INSERT INTO streaming_test.key_value (key, value) VALUES ('$xN' , $x)")})
+                true;
+              }
+            }
+        }
+      )
   }
 
-  def startStream(sparkConf:SparkConf, intervalSecs:Int, partitionsEachInterval:Int, numTweetsToCollect:Int) = {
+  /**
+   * This is a generic ETL method.
+   * @param sparkConf
+   * @param intervalSecs
+   * @param partitionsEachInterval
+   * @param numTweetsToCollect
+   * @param etl
+   */
+  def startStream(sparkConf:SparkConf, intervalSecs:Int,
+                  partitionsEachInterval:Int, numTweetsToCollect:Int,
+                  etl:(Array[String],SparkConf)=>Boolean) = {
 
     val sc = new SparkContext(sparkConf)
     val ssc = new StreamingContext(sc, Seconds(intervalSecs))
@@ -64,20 +90,14 @@ object Processor {
     stream.foreachRDD(rdd => {
       count+=1
       if (count>2) {
-        //assumes session.
-        CassandraConnector(sparkConf).withSessionDo
-        { session =>
-          val xN="n"+System.currentTimeMillis()+count
-          val x=1
-          Thread.sleep(1)
-          session.execute(s"INSERT INTO streaming_test.key_value (key, value) VALUES ('$xN' , $x)")
-        }
+        etl(rdd.collect(), sparkConf)
         ssc.stop()
         sc.stop();
         System.exit(0)
       }
     })
     ssc.start()
-    ssc.awaitTermination()}
+    ssc.awaitTermination()
+  }
 
 }
