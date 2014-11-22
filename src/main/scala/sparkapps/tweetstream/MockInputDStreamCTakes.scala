@@ -75,6 +75,7 @@ class MockInputDStreamCTakes(sec:Long, @transient ssc_ : StreamingContext)
             override def run(): Unit = {
               while(!killed) {
                 System.out.println("-")
+                //how does this = Status, but compiles to String?
                 store(newStatus(System.currentTimeMillis()))
                 Thread.sleep(1000);
               }

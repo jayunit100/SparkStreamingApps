@@ -15,6 +15,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 import com.datastax.spark.connector.cql.CassandraConnector
 import com.datastax.spark.connector.SomeColumns
 import com.datastax.spark.connector.cql._
+import twitter4j.Status
 
 /**
  * Completely application neutral stream processor.
@@ -24,6 +25,9 @@ object Processor {
   import org.apache.spark.rdd;
   val total=10;
   var gson = new Gson()
+
+
+
 
   /**
    * FYI This should fail fast for you if cassandra isnt set up right :).
@@ -35,8 +39,6 @@ object Processor {
         .setMaster("local[2]")
         .set("spark.cassandra.connection.host", "127.0.0.1")
         .set("spark.cassandra.connection.native.port","9042")
-        //.set("spark.cassandra.auth.username", "cassandra")
-        //.set("spark.cassandra.auth.password", "cassandra")
 
       CassandraConnector(conf).withSessionDo { session =>
         session.execute(s"CREATE KEYSPACE IF NOT EXISTS streaming_test WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 3 }")
@@ -44,7 +46,7 @@ object Processor {
         session.execute(s"TRUNCATE streaming_test.key_value")
       }
       startStream(
-      conf,
+        conf,
         1,1,1,
         {
           (transactions,sparkConf) =>
@@ -54,7 +56,9 @@ object Processor {
                 val x=1
                 Thread.sleep(1)
                 transactions.foreach(
-                  {xN => session.execute(s"INSERT INTO streaming_test.key_value (key, value) VALUES ('$xN' , $x)")})
+                  {xN =>
+                    System.out.println(s"storing '$xN' == $xN")
+                    session.execute(s"INSERT INTO streaming_test.key_value (key, value) VALUES ('$xN' , $x)")})
                 true;
               }
             }
@@ -72,16 +76,13 @@ object Processor {
    */
   def startStream(sparkConf:SparkConf, intervalSecs:Int,
                   partitionsEachInterval:Int, numTweetsToCollect:Int,
-                  etl:(Array[String],SparkConf)=>Boolean) = {
+                  etl:(Array[Status],SparkConf)=>Boolean) = {
 
     val sc = new SparkContext(sparkConf)
     val ssc = new StreamingContext(sc, Seconds(intervalSecs))
 
     val stream  =
-      new MockInputDStreamCTakes(total,ssc)
-        .map(gson.toJson(_)) //not required, but keep it around for twitter based examples.
-        .filter(!_.
-          contains("boundingBoxCoordinates"));
+      new MockInputDStreamCTakes(total,ssc);
 
     var count = 0;
     println("Initializing Streaming Spark Context... 4")
@@ -90,7 +91,8 @@ object Processor {
     stream.foreachRDD(rdd => {
       count+=1
       if (count>2) {
-        etl(rdd.collect(), sparkConf)
+        etl(rdd.collect(), ///<<<<<<<<<< TODO ::: is this still NULL ??>?
+          sparkConf)
         ssc.stop()
         sc.stop();
         System.exit(0)
