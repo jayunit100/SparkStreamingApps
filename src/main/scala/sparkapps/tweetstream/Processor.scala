@@ -29,7 +29,7 @@ import twitter4j.Status
  * Meanwhile, the production app will create implicits for real data
  * which gets put into hbase.
  */
-object Processor {
+object TwitterStreamingApp {
 
   import org.apache.spark.rdd;
   val total=10;
@@ -38,7 +38,7 @@ object Processor {
 
   def startStream(sparkConf:SparkConf,
                   stream:(StreamingContext => ReceiverInputDStream[Status]),
-                  etl:(Array[Status],SparkConf)=>Boolean) = {
+                  pluggableETLFunction:(Array[Status],SparkConf)=>Boolean) = {
     val sc=new SparkContext(sparkConf);
 
     val ssc=new StreamingContext(sc, Seconds(intervalSecs))
@@ -56,7 +56,7 @@ object Processor {
         .foreachRDD(rdd => {
           count+=1
           if (count>2) {
-            etl(rdd.collect(),
+            pluggableETLFunction(rdd.collect(),
             ///<<<<<<<<<< TODO ::: is this still NULL
               sparkConf)
             ssc.stop()

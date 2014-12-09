@@ -1,7 +1,6 @@
 import com.datastax.spark.connector.cql.CassandraConnector
 import org.apache.spark.SparkConf
-import sparkapps.tweetstream.MockInputDStreamCTakes
-import sparkapps.tweetstream.Processor
+import sparkapps.tweetstream.{TwitterStreamingApp, MockInputDStreamCTakes, Processor}
 
 /**
  *
@@ -14,10 +13,18 @@ import sparkapps.tweetstream.Processor
  * 3) ETLs function is sent as an argument to the Processor.
  *
  */
-class TestCassandraProcessor {
+class TestTwitterETL {
 
+
+  /**
+   * Add other examples.... i.e. hbase ETL, here.
+   */
+
+  /**
+   * Here is an implementation of Cassandra based ETL.
+   */
   @org.junit.Test
-  def test(){
+  def testCassandraETL(){
     /**
      * FYI This should fail fast for you if cassandra isnt set up right :).
      * make sure and turn off iptables if you get a "operation timed out" exception.
@@ -37,7 +44,7 @@ class TestCassandraProcessor {
       }
 
 
-      Processor.startStream(
+      TwitterStreamingApp.startStream(
         conf,
         sparkapps.tweetstream.MockInputDStreamCTakes(1)_, // <-- how to make this curried?
         {
@@ -58,7 +65,7 @@ class TestCassandraProcessor {
         })
     }
 
-    sparkapps.tweetstream.Processor.startCassandraStream()
+    startCassandraStream()
   }
 
 }
