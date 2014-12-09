@@ -11,7 +11,7 @@ import org.apache.spark.streaming.dstream.{ReceiverInputDStream, DStream}
 /**
  * Moddified and borrowed from databricks spark tutorial.
  */
-object TwitterUtilsCtakes {
+object TwitterUtilsCTakes {
   /**
    * Create a input stream that returns tweets received from Twitter.
    * @param ssc         StreamingContext object

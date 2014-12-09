@@ -160,7 +160,7 @@ object Driver {
     /**
     *  
     */
-    val tweetStream = TwitterUtilsCtakes.createStream(
+    val tweetStream = TwitterUtilsCTakes.createStream(
       ssc,
       Utils.getAuth,
       Seq("medical"),
