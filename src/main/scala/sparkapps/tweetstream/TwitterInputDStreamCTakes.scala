@@ -1,25 +1,13 @@
-package sparkapps.ctakes
+package sparkapps.tweetstream
 
-import java.nio.ByteBuffer
-import java.util.Date
-import java.util.concurrent.{Callable, FutureTask}
-
-import org.apache.ctakes.core.fsm.token.BaseToken
-import org.apache.uima.analysis_engine.AnalysisEngineDescription
-import org.apache.uima.jcas.JCas
-import org.uimafit.factory.JCasFactory
-import org.uimafit.pipeline.SimplePipeline
-import org.uimafit.util.JCasUtil
-import twitter4j._
-import twitter4j.auth.Authorization
-import twitter4j.conf.ConfigurationBuilder
-import twitter4j.auth.OAuthAuthorization
-
+import org.apache.spark.Logging
+import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.dstream._
-import org.apache.spark.storage.StorageLevel
-import org.apache.spark.Logging
 import org.apache.spark.streaming.receiver.Receiver
+import twitter4j._
+import twitter4j.auth.{Authorization, OAuthAuthorization}
+import twitter4j.conf.ConfigurationBuilder
 
 
 
@@ -32,11 +20,10 @@ import org.apache.spark.streaming.receiver.Receiver
   * If no Authorization object is provided, initializes OAuth authorization using the system
   * properties twitter4j.oauth.consumerKey, .consumerSecret, .accessToken and .accessTokenSecret.
   */
-class TwitterInputDStreamCTakes(
-                             @transient ssc_ : StreamingContext,
+case class TwitterInputDStreamCTakes(
+                                 @transient ssc_ : StreamingContext,
                              twitterAuth: Option[Authorization],
                              filters: Seq[String],
-                             storageLevel: StorageLevel,
                              slideSeconds: Int) extends ReceiverInputDStream[Status](ssc_) {
 
     override def slideDuration(): Duration = {
@@ -51,7 +38,7 @@ class TwitterInputDStreamCTakes(
     private val authorization = twitterAuth.getOrElse(createOAuthAuthorization())
 
     override def getReceiver(): Receiver[Status] = {
-      new TwitterReceiver(authorization, filters, storageLevel)
+      new TwitterReceiver(authorization, filters, StorageLevel.MEMORY_AND_DISK)
     }
   }
 

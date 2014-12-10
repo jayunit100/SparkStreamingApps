@@ -1,6 +1,6 @@
 import com.datastax.spark.connector.cql.CassandraConnector
 import org.apache.spark.SparkConf
-import sparkapps.tweetstream.{TwitterStreamingApp, MockInputDStreamCTakes, Processor}
+import sparkapps.tweetstream.{TwitterAppTemplate, TwitterStreamingApp, MockInputDStream, Processor}
 
 /**
  *
@@ -44,9 +44,9 @@ class TestTwitterETL {
       }
 
 
-      TwitterStreamingApp.startStream(
+      TwitterAppTemplate.startStream(
         conf,
-        sparkapps.tweetstream.MockInputDStreamCTakes(1)_, // <-- how to make this curried?
+        sparkapps.tweetstream.MockInputDStream(1)_, // <-- how to make this curried?
         {
           (transactions,sparkConf) =>
             //assumes session.

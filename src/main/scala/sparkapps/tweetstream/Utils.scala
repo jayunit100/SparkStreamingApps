@@ -1,10 +1,7 @@
-package sparkapps.ctakes
+package sparkapps.tweetstream
 
 import java.util.Date
 
-import org.apache.commons.cli.{Options, ParseException, PosixParser}
-import org.apache.spark.mllib.linalg.Vector
-import org.apache.spark.mllib.feature.HashingTF
 import twitter4j._
 import twitter4j.auth.OAuthAuthorization
 import twitter4j.conf.ConfigurationBuilder
@@ -19,10 +16,9 @@ object Utils {
    * verifies that each input in the string passes the tester function.
    * prints error and exists if not.
    */
-  def checkpoint(
-                  tester : Any => Boolean,
-                  error : Any => Unit,
-                  inputs: List[String]): Unit = {
+  def checkpoint(tester : Any => Boolean,
+                 error : Any => Unit,
+                 inputs: List[String]): Unit = {
     System.out.println("~~~~~~ Checkpoint ~~~~~")
     def test(failures:Int, tests : List[String]):Boolean= {
       tests match {

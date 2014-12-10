@@ -1,4 +1,5 @@
-package sparkapps.ctakes
+package sparkapps.tweetstream
+
 import scala.collection.immutable._;
 /**
  * A simple utility for parsing arguments.

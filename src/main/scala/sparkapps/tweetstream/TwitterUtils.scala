@@ -1,17 +1,16 @@
-package sparkapps.ctakes
+package sparkapps.tweetstream
 
-import org.apache.spark.streaming.twitter.TwitterInputDStream
-import twitter4j.Status
-import twitter4j.auth.Authorization
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.StreamingContext
-import org.apache.spark.streaming.api.java.{JavaReceiverInputDStream, JavaDStream, JavaStreamingContext}
-import org.apache.spark.streaming.dstream.{ReceiverInputDStream, DStream}
+import org.apache.spark.streaming.api.java.{JavaReceiverInputDStream, JavaStreamingContext}
+import org.apache.spark.streaming.dstream.ReceiverInputDStream
+import twitter4j.Status
+import twitter4j.auth.Authorization
 
 /**
  * Moddified and borrowed from databricks spark tutorial.
  */
-object TwitterUtilsCTakes {
+object TwitterUtils {
   /**
    * Create a input stream that returns tweets received from Twitter.
    * @param ssc         StreamingContext object

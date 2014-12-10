@@ -29,7 +29,7 @@ import org.apache.spark.streaming.receiver.Receiver
  * tweet processor, which should take a RececiverInputDSTream[Status] as input,
  * and process tweets.
  */
-case class MockInputDStreamCTakes(sec:Long)(@transient ssc_ : StreamingContext)
+case class MockInputDStream(sec:Long)(@transient ssc_ : StreamingContext)
   extends ReceiverInputDStream[Status](ssc_)  {
 
   override def slideDuration(): Duration = {

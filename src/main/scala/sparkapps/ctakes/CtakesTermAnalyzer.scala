@@ -52,4 +52,8 @@ object CtakesTermAnalyzer {
     //return the iterator.
     JCasUtil.select(jcas,classOf[BaseToken]).iterator()
   }
+
+  def main(args: Array[String]): Unit = {
+    System.out.println(analyze("The patient might have diabetes.  His blood sugare and glucose levels are off the charts.  Symptoms include naseau and light headedness."))
+  }
 }

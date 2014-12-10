@@ -2,6 +2,7 @@ package sparkapps.ctakes
 
 import java.io.File
 
+import com.datastax.spark.connector.cql.CassandraConnector
 import com.google.gson.Gson
 import com.google.gson._
 import jregex.Pattern
@@ -10,6 +11,8 @@ import org.apache.spark.streaming.dstream.{DStream, ReceiverInputDStream}
 import org.apache.spark.streaming.twitter.TwitterUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
+import sparkapps.tweetstream._
+import twitter4j.auth.{OAuthSupport, Authorization}
 import scala.runtime.ScalaRunTime._
 /**
  * Collect at least the specified number of tweets into json text files.
@@ -154,43 +157,33 @@ object Driver {
     val conf = new SparkConf()
       .setAppName(this.getClass.getSimpleName+""+System.currentTimeMillis())
       .setMaster("local[2]")
-    val sc = new SparkContext(conf)
-    val ssc = new StreamingContext(sc, Seconds(intervalSecs))
+    val sCon = new SparkContext(conf)
+    val ssCon = new StreamingContext(sCon, Seconds(intervalSecs))
 
-    /**
-    *  
-    */
-    val tweetStream = TwitterUtilsCTakes.createStream(
-      ssc,
-      Utils.getAuth,
-      Seq("medical"),
-      StorageLevel.MEMORY_ONLY)
-        .map(gson.toJson(_))
-        .filter(!_.contains("boundingBoxCoordinates"))//SPARK-3390
-
-    var checks = 0;
-    tweetStream.foreachRDD(rdd => {
-      val outputRDD = rdd.repartition(partitionsEachInterval)
-      System.out.println(rdd.count());
-      numTweetsCollected += rdd.count()
-      System.out.println("\n\n\n PROGRESS ::: "+numTweetsCollected + " so far, out of " + numTweetsToCollect + " \n\n\n ");
-      if (numTweetsCollected > numTweetsToCollect) {
-          ssc.stop()
-          sc.stop();
-          System.exit(0)
+    TwitterAppTemplate.startStream(
+      conf,
+      //fix this line, then app should be testable against cassandra.
+      { ssc=>sparkapps.tweetstream.TwitterInputDStreamCTakes(
+        ssc,
+        Utils.getAuth,
+        null,
+        1)_ },
+      {
+        (transactions,sparkConf) =>
+          //assumes session.
+          CassandraConnector(sparkConf).withSessionDo {
+            session => {
+              val x=1
+              Thread.sleep(1)
+              transactions.foreach({
+                xN =>
+                  val xNtxt=xN.toString+" "+xN.getText;
+                  session.executeAsync(s"INSERT INTO streaming_test.key_value (key, value) VALUES ('$xNtxt' , $x)")}
+              )
+              true;
+            }
+          }
       }
-    })
-
-    /**
-     * This is where we invoke CTakes.  For your CTAkes implementation, you would change the logic here
-     * to do something like store results to a file, or do a more sophisticated series of tasks.
-     */
-    val stream = tweetStream.map(
-      x =>
-        System.out.println(" " + CtakesTermAnalyzer.analyze(x)));
-
-    stream.print();
-    ssc.start()
-    ssc.awaitTermination()
+    )
   }
 }

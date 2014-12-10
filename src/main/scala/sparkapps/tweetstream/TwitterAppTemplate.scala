@@ -3,7 +3,7 @@ package sparkapps.tweetstream
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.{SparkContext, SparkConf}
-import sparkapps.ctakes.{CtakesTermAnalyzer, Utils, TwitterUtilsCTakes}
+import sparkapps.ctakes.CtakesTermAnalyzer
 import com.google.gson.Gson
 import com.google.gson._
 import jregex.Pattern
@@ -29,7 +29,7 @@ import twitter4j.Status
  * Meanwhile, the production app will create implicits for real data
  * which gets put into hbase.
  */
-object TwitterStreamingApp {
+object TwitterAppTemplate {
 
   import org.apache.spark.rdd;
   val total=10;
@@ -48,7 +48,7 @@ object TwitterStreamingApp {
 
 
     //Without this, nothing will execute: Streaming context's require an attached consumer to run.
-    TwitterUtilsCTakes.createStream(
+    TwitterUtils.createStream(
       ssc,
       Utils.getAuth,
       Seq("medical"),
