@@ -1,4 +1,4 @@
-package sparkapps.tweetstream
+package sparkapps.ctakes
 
 import org.apache.spark.Logging
 import org.apache.spark.storage.StorageLevel

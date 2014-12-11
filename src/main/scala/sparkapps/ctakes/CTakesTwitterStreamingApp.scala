@@ -11,6 +11,7 @@ import org.apache.spark.streaming.dstream.{DStream, ReceiverInputDStream}
 import org.apache.spark.streaming.twitter.TwitterUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
+import sparkapps.ctakes.TwitterInputDStreamCTakes
 import sparkapps.tweetstream._
 import twitter4j.auth.{OAuthSupport, Authorization}
 import scala.runtime.ScalaRunTime._
@@ -160,14 +161,21 @@ object Driver {
     val sCon = new SparkContext(conf)
     val ssCon = new StreamingContext(sCon, Seconds(intervalSecs))
 
+    /**
+     * Here is the logic of the entire application.
+     * We use the generic streaming utility to do the
+     * spark streaming glue.
+     */
     TwitterAppTemplate.startStream(
       conf,
-      //fix this line, then app should be testable against cassandra.
-      { ssc=>sparkapps.tweetstream.TwitterInputDStreamCTakes(
-        ssc,
-        Utils.getAuth,
-        null,
-        1)_ },
+      /**
+       * The function which creates the DStream, given a context.
+       */
+    {ssc=> TwitterInputDStreamCTakes(ssc, Utils.getAuth, null, 1)_ },
+      /**
+      *  The function which Process outputs from the DStream,
+       * given a RDD and a sparkConfiguration.
+      */
       {
         (transactions,sparkConf) =>
           //assumes session.
