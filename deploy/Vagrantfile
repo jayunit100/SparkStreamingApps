@@ -28,14 +28,27 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # image definition
   config.vm.define "image", autostart: false do |image|
     image.vm.provider "docker" do |d|
-      d.build_dir = "."
-      d.build_args = ["-t",CONF["docker"]["image"]]
-      d.vagrant_machine = "boot2docker"
-      d.vagrant_vagrantfile = "./boot2docker/Vagrantfile"
+      d.build_dir = "./spark"
+      d.build_args = ["-t",CONF["docker"]["spark-image"]]
+      #d.vagrant_machine = "boot2docker"
+      #d.vagrant_vagrantfile = "./boot2docker/Vagrantfile"
     end
     image.ssh.username = "root"
     image.ssh.port = 22
   end
+
+  # image definition
+  config.vm.define "image", autostart: false do |image|
+    image.vm.provider "docker" do |d|
+      d.build_dir = "./cassandra"
+      d.build_args = ["-t",CONF["docker"]["cassandra-image"]]
+      #d.vagrant_machine = "boot2docker"
+      #d.vagrant_vagrantfile = "./boot2docker/Vagrantfile"
+    end
+    image.ssh.username = "root"
+    image.ssh.port = 22
+  end
+
 
   # nodes definition
   (1..$spark_num_instances).each do |i|
@@ -47,13 +60,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         if "#{i}" == "1"
             d.ports = [CONF["namenode_ui_port"] + ":50070", CONF["yarn_ui_port"] + ":8088", CONF["hbase_ui_port"] + ":60010"]
         end
-        d.vagrant_machine = "boot2docker"
-        d.vagrant_vagrantfile = "./boot2docker/Vagrantfile"
+        #d.vagrant_machine = "boot2docker"
+        #d.vagrant_vagrantfile = "./boot2docker/Vagrantfile"
       end
-      bigtop.ssh.username = "root"
-      bigtop.ssh.port = 22
-      bigtop.vm.hostname = "scale#{i}.docker"
-      bigtop.vm.synced_folder "./", "/scale-shared/"
+      scale.ssh.username = "root"
+      scale.ssh.port = 22
+      scale.vm.hostname = "scale#{i}.docker"
+      scale.vm.synced_folder "./", "/scale-shared/"
     end
   end
 
