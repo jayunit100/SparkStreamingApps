@@ -4,7 +4,7 @@
 require 'fileutils'
 
 # number of instances
-$spark_num_instances = 3
+$spark_num_instances = 1
 $cassandra_num_instances = 3 
 
 # load configuration from config.rb
@@ -25,48 +25,37 @@ Vagrant.require_version ">= 1.6.0"
 VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-  # image definition
-  config.vm.define "image", autostart: false do |image|
-    image.vm.provider "docker" do |d|
-      d.build_dir = "./spark"
-      d.build_args = ["-t",CONF["docker"]["spark-image"]]
-      #d.vagrant_machine = "boot2docker"
-      #d.vagrant_vagrantfile = "./boot2docker/Vagrantfile"
-    end
-    image.ssh.username = "root"
-    image.ssh.port = 22
-  end
-
-  # image definition
-  config.vm.define "image", autostart: false do |image|
-    image.vm.provider "docker" do |d|
-      d.build_dir = "./cassandra"
-      d.build_args = ["-t",CONF["docker"]["cassandra-image"]]
-      #d.vagrant_machine = "boot2docker"
-      #d.vagrant_vagrantfile = "./boot2docker/Vagrantfile"
-    end
-    image.ssh.username = "root"
-    image.ssh.port = 22
-  end
-
-
-  # nodes definition
+# nodes definition
   (1..$spark_num_instances).each do |i|
     config.vm.define "scale#{i}" do |scale|
-      # docker container settings
       scale.vm.provider "docker" do |d|
-        d.image = CONF["docker"]["spark-image"]
+        d.build_dir = "spark/"
         d.create_args = ["--privileged=true", "-m", CONF["docker"]['memory_size'] + "m"]
+        d.remains_running = false
+        d.has_ssh = true
         if "#{i}" == "1"
             d.ports = [CONF["namenode_ui_port"] + ":50070", CONF["yarn_ui_port"] + ":8088", CONF["hbase_ui_port"] + ":60010"]
         end
-        #d.vagrant_machine = "boot2docker"
-        #d.vagrant_vagrantfile = "./boot2docker/Vagrantfile"
       end
-      scale.ssh.username = "root"
-      scale.ssh.port = 22
-      scale.vm.hostname = "scale#{i}.docker"
-      scale.vm.synced_folder "./", "/scale-shared/"
+     ### All machines will have java.
+     scale.vm.provision "shell", inline:"yum install -y java-1.7.0-openjdk-devel.x86_64"
+     scale.vm.provision "shell", inline:"yum install -y spark-worker"
+     scale.vm.provision "shell", inline:"echo \"export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk/\" >> /etc/spark/conf/spark-env.sh"
+     scale.vm.provision "shell", inline:"echo \"export STANDALONE_SPARK_MASTER_HOST=scale1.docker\" >> /etc/spark/conf/spark-env.sh" 
+    
+     ### Spark master
+     if "#{i}" == "1"
+          scale.vm.provision "shell", inline:"yum install -y spark-master"
+          scale.vm.provision "shell", inline:"service spark-master start"
+     end
+
+     ## All nodes have a worker [for real micro servs, make this for i>2.
+     scale.vm.provision "shell", inline:"service spark-worker start"
+     
+     scale.ssh.username = "root"
+     scale.ssh.port = 22
+     scale.vm.hostname = "scale#{i}.docker" 
+     scale.vm.synced_folder "./", "/scale-shared/"
     end
   end
 

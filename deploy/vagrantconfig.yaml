@@ -1,7 +1,7 @@
 docker:
         memory_size: "2048"
-        cassandra-image: "bigtop/ssh:centos-6.4"
-        spark-image: "bigtop/ssh:centos-6.4"
+        #cassandra-image: "bigtop/ssh:centos-6.4"
+        #spark-image: "bigtop/ssh:centos-6.4"
 
 boot2docker:
         memory_size: "4196"
