@@ -3,51 +3,69 @@
 
 require 'fileutils'
 
-# number of instances
-$spark_num_instances = 1
+# number of instances : First one is master.
+$spark_num_instances = 2
 $cassandra_num_instances = 3 
 spark_master_host = "scale1.docker" # see the logic below, we set hostname = scale#{i}.docker.
+ 
+puts "Spark instances #{$spark_num_instances}"
 
-# load configuration from config.rb
-CONFIG = File.join(File.dirname(__FILE__), "config.rb")
-if File.exist?(CONFIG)
-  require CONFIG
+# Verify some basic stuff.
+def verify
+    if $spark_num_instances < 2
+       puts "exiting ... spark instances must be > 1 for microservice architecture !"
+       exit
+     end
 end
+def config
+    # load configuration from config.rb
+    configfile = File.join(File.dirname(__FILE__), "config.rb")
+    if File.exist?(configfile)
+      require configfile
+    end
+    require "yaml"
+    _config = YAML.load(File.open(File.join(File.dirname(__FILE__), "vagrantconfig.yaml"), File::RDONLY).read)
+    $conf = _config
+    ENV['VAGRANT_DEFAULT_PROVIDER'] ||= 'docker'
+    Vagrant.require_version ">= 1.6.0"
+end
+ 
+verify
+config
 
-require "yaml"
-
-_config = YAML.load(File.open(File.join(File.dirname(__FILE__), "vagrantconfig.yaml"), File::RDONLY).read)
-CONF = _config
-
-ENV['VAGRANT_DEFAULT_PROVIDER'] ||= 'docker'
-
-Vagrant.require_version ">= 1.6.0"
-
-VAGRANTFILE_API_VERSION = "2"
+VAGRANTFILE_API_VERSION = "2"  
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-
+  
 # nodes definition
   (1..$spark_num_instances).each do |i|
     config.vm.define "scale#{i}" do |scale|
+      config.hostmanager.enabled = true
+      config.hostmanager.manage_host = true
+      
       scale.vm.provider "docker" do |d|
         d.build_dir = "spark/"
-        d.create_args = ["--privileged=true", "-m", CONF["docker"]['memory_size'] + "m"]
+        ### This will fail if other containers are running.  we can provide an offset, though.
+        d.create_args = ["--privileged=true", "-m", $conf["docker"]['memory_size'] + "m"]
         d.remains_running = false
         d.has_ssh = true
         if "#{i}" == "1"
-            d.ports = [CONF["namenode_ui_port"] + ":50070", CONF["yarn_ui_port"] + ":8088", CONF["hbase_ui_port"] + ":60010"]
+            d.ports = ["7707:7707"] # bind spark 7707 to host 7707
         end
       end
      ### All machines will have java.
      scale.vm.provision "shell", inline:"echo \"export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk/\" >> $SPARK_HOME/conf/spark-env.sh"
-      
-     ### Spark master.
-     if "#{i}" == "1"
+     
+     ### Important ! Microservice architecture is implemented here. 
+     ### Spark master runs in a single container.
+     ### Slaves run in all other containers.
+     if "#{i}" == "1" # MASTER microservice
           scale.vm.provision "shell", inline:"$SPARK_HOME/sbin/start-master.sh"
+          scale.vm.provision "shell", inline: "ip addr | grep 172 | cut -d' ' -f6 | cut -d'/' -f1 > /vagrant/MASTER_IP"
+     else # SLAVE microservice
+          scale.vm.provision "shell", inline: "cat /vagrant/MASTER_IP > /tmp/dbg1" #deleteme
+          scale.vm.provision "shell", inline:"$SPARK_HOME/sbin/start-slave.sh -h spark://`cat /vagrant/MASTER_IP`:7077"
      end
 
-     ## All nodes have a worker [for real micro servs, make this for i>2.
-     scale.vm.provision "shell", inline:"$SPARK_HOME/sbin/start-slave.sh -h spark://#{spark_master_host}:7077"
      scale.ssh.username = "root"
      scale.ssh.port = 22
      scale.vm.hostname = "scale#{i}.docker" 
