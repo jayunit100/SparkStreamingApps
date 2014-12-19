@@ -1,15 +1,14 @@
-
 FROM centos:centos7
 RUN yum clean all
-RUN yum install -y yum-utils
+RUN yum install -y tar yum-utils wget
 RUN yum-config-manager --save --setopt=fedora.skip_if_unavailable=true     
 RUN yum update -y
-RUN yum install -y wget
 
-#### RUN wget -O /etc/yum.repos.d/bigtop.repo http://bigtop01.cloudera.org:8080/view/Releases/job/Bigtop-0.8.0/label=centos6/6/artifact/output/bigtop.repo
+# Java
+RUN yum install -y java-1.7.0-openjdk-devel.x86_64
 
-#### CDH5 is ahead of bigtop, use this for now.
-RUN wget -O /etc/yum.repos.d/cdh5.repo http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/cloudera-cdh5.repo -O /etc/yum.repos.d/cdh5.repo  
+# Spark  in /opt. default to hadoop 2.4 version.
+RUN curl -s http://d3kbcqa49mib13.cloudfront.net/spark-1.2.0-bin-hadoop2.4.tgz | tar -xz -C /opt/
 
 #### Now install SSH so we can layer in the spark components.
 RUN yum -y install openssh-server openssh-clients sudo

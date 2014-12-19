@@ -6,6 +6,8 @@ require 'fileutils'
 # number of instances
 $spark_num_instances = 1
 $cassandra_num_instances = 3 
+spark_distro = "spark-1.2.0-bin-hadoop2.4"
+spark_master_host = "scale1.docker" # see the logic below, we set hostname = scale#{i}.docker.
 
 # load configuration from config.rb
 CONFIG = File.join(File.dirname(__FILE__), "config.rb")
@@ -38,20 +40,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         end
       end
      ### All machines will have java.
-     scale.vm.provision "shell", inline:"yum install -y java-1.7.0-openjdk-devel.x86_64"
-     scale.vm.provision "shell", inline:"yum install -y spark-worker"
-     scale.vm.provision "shell", inline:"echo \"export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk/\" >> /etc/spark/conf/spark-env.sh"
-     scale.vm.provision "shell", inline:"echo \"export STANDALONE_SPARK_MASTER_HOST=scale1.docker\" >> /etc/spark/conf/spark-env.sh" 
-    
-     ### Spark master
+     scale.vm.provision "shell", inline:"echo \"export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk/\" >> /opt/#{spark_distro}/conf/spark-env.sh"
+     #scale.vm.provision "shell", inline:"echo \"export SPARK_MASTER_IP=scale1.docker\" >> /opt/#{spark_distro}/conf/spark-env.sh" 
+      
+     ### Spark master.
      if "#{i}" == "1"
-          scale.vm.provision "shell", inline:"yum install -y spark-master"
-          scale.vm.provision "shell", inline:"service spark-master start"
+          scale.vm.provision "shell", inline:"/opt/#{spark_distro}/sbin/start-master.sh"
      end
 
      ## All nodes have a worker [for real micro servs, make this for i>2.
-     scale.vm.provision "shell", inline:"service spark-worker start"
-     
+     scale.vm.provision "shell", inline:"/opt/#{spark_distro}/sbin/start-slave.sh -h spark://#{spark_master_host}:7077"
      scale.ssh.username = "root"
      scale.ssh.port = 22
      scale.vm.hostname = "scale#{i}.docker" 
