@@ -8,7 +8,10 @@ RUN yum update -y
 RUN yum install -y java-1.7.0-openjdk-devel.x86_64
 
 # Spark  in /opt. default to hadoop 2.4 version.
-RUN curl -s http://d3kbcqa49mib13.cloudfront.net/spark-1.2.0-bin-hadoop2.4.tgz | tar -xz -C /opt/
+ADD http://d3kbcqa49mib13.cloudfront.net/spark-1.2.0-bin-hadoop2.4.tgz /opt/
+# ADD from HTTP doesn't unzip for us (https://github.com/docker/docker/issues/6353).  So untar here.
+RUN tar -xzf /opt/spark-1.2.0-bin-hadoop2.4.tgz -C /opt/
+ENV SPARK_HOME /opt/spark-1.2.0-bin-hadoop2.4
 
 #### Now install SSH so we can layer in the spark components.
 RUN yum -y install openssh-server openssh-clients sudo
