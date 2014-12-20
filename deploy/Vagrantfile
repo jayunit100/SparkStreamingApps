@@ -49,21 +49,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         d.remains_running = false
         d.has_ssh = true
         if "#{i}" == "1"
-            d.ports = ["7707:7707"] # bind spark 7707 to host 7707
+            d.ports = ["4040:4040","7707:7707","40000:50000"] # bind spark 7707 to host 7707
         end
       end
      ### All machines will have java.
      scale.vm.provision "shell", inline:"echo \"export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk/\" >> $SPARK_HOME/conf/spark-env.sh"
-     
+   
+     # hard copy of hosts appended to existing hosts file.
+     scale.vm.provision "shell", inline:"cat /vagrant/hosts >> /etc/hosts"    
+
      ### Important ! Microservice architecture is implemented here. 
      ### Spark master runs in a single container.
      ### Slaves run in all other containers.
      if "#{i}" == "1" # MASTER microservice
           scale.vm.provision "shell", inline:"$SPARK_HOME/sbin/start-master.sh"
-          scale.vm.provision "shell", inline: "ip addr | grep 172 | cut -d' ' -f6 | cut -d'/' -f1 > /vagrant/MASTER_IP"
      else # SLAVE microservice
-          scale.vm.provision "shell", inline: "cat /vagrant/MASTER_IP > /tmp/dbg1" #deleteme
-          scale.vm.provision "shell", inline:"$SPARK_HOME/sbin/start-slave.sh -h spark://`cat /vagrant/MASTER_IP`:7077"
+          puts "WARNING : ASSUMES ALL DOCKER CONTAINERS KILLED, indexing ips from 1 as master !!!"
+          scale.vm.provision "shell", inline:"$SPARK_HOME/sbin/start-slave.sh -h spark://scale1.docker:7077"
      end
 
      scale.ssh.username = "root"
