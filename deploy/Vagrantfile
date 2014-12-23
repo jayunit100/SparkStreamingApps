@@ -51,7 +51,6 @@ end
 verify
 config
 
-puts "-----"
 VAGRANTFILE_API_VERSION = "2"  
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # nodes definition
@@ -60,10 +59,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             scale.vm.provider "docker" do |d|
                 docker_setup(d, i, scale, "spark/") 
             end
-
             scale.vm.provision "shell", inline:"echo \"export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk/\" >> $SPARK_HOME/conf/spark-env.sh"
-     
-            if "#{i}" == "1" # master micro servuce
+            if "#{i}" == "1" # master micro serv
                 scale.vm.provision "shell", inline:"$SPARK_HOME/sbin/start-master.sh"
             else
                 puts "WARNING : assuming indexing for ips at 1" 
@@ -73,17 +70,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         end 
     end
 
+    #luckily with cassandra we don't have master/slave architecture.
     (1..$cassandra_num_instances).each do |i|
-        config.vm.define "scale#{i}" do |scale|     
-            docker_setup(i, scale, "cassandra/")
-
-            if "#{i}" == "1" # MASTER microservice
-                scale.vm.provision "shell", inline:"$CASSANDRA_HOME/sbin/start-master.sh"
-            else # SLAVE microservice
-               puts "micro service for starting cassandra slave..."
-            end
-            scale.vm.synced_folder "./", "/scale-shared/"
-        end
-    end 
+       config.vm.define "cassandra#{i}" do |scale|     
+           scale.vm.provider "docker" do |d|
+               docker_setup(d, i, scale, "cassandra/")
+           end
+           puts "cassandra node = #{i}"            
+           scale.vm.synced_folder "./", "/scale-shared/"
+       end
+   end 
 end # end Vagrant
-
