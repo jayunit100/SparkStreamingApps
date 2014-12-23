@@ -5,14 +5,14 @@ require 'fileutils'
 
 # number of instances : First one is master.
 $spark_num_instances = 2
-$cassandra_num_instances = 3 
+$cassandra_num_instances = 2
 spark_master_host = "scale1.docker" # see the logic below, we set hostname = scale#{i}.docker.
  
 puts "Spark instances #{$spark_num_instances}"
 
 # Verify some basic stuff.
 def verify
-    if $spark_num_instances < 2
+    if $spark_num_instances > 0 && $spark_num_instances < 2
        puts "exiting ... spark instances must be > 1 for microservice architecture !"
        exit
      end
@@ -30,49 +30,60 @@ def config
     Vagrant.require_version ">= 1.6.0"
 end
  
-verify
-config
-
-VAGRANTFILE_API_VERSION = "2"  
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  
-# nodes definition
-  (1..$spark_num_instances).each do |i|
-    config.vm.define "scale#{i}" do |scale|
-      config.hostmanager.enabled = true
-      config.hostmanager.manage_host = true
-      
-      scale.vm.provider "docker" do |d|
-        d.build_dir = "spark/"
-        ### This will fail if other containers are running.  we can provide an offset, though.
+### Takes an "int" and a "config.vm.define"
+### Object as inputs.
+### Defines the docker specific parameters.
+def docker_setup(d, i, scale, builddir)
+        d.build_dir = builddir
         d.create_args = ["--privileged=true", "-m", $conf["docker"]['memory_size'] + "m"]
         d.remains_running = false
         d.has_ssh = true
         if "#{i}" == "1"
-            d.ports = ["4040:4040","7707:7707","40000:50000"] # bind spark 7707 to host 7707
+            d.ports = ["4040:4040","7707:7707"] # bind spark 7707 to host 7707
         end
-      end
-     ### All machines will have java.
-     scale.vm.provision "shell", inline:"echo \"export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk/\" >> $SPARK_HOME/conf/spark-env.sh"
-   
-     # hard copy of hosts appended to existing hosts file.
-     scale.vm.provision "shell", inline:"cat /vagrant/hosts >> /etc/hosts"    
-
-     ### Important ! Microservice architecture is implemented here. 
-     ### Spark master runs in a single container.
-     ### Slaves run in all other containers.
-     if "#{i}" == "1" # MASTER microservice
-          scale.vm.provision "shell", inline:"$SPARK_HOME/sbin/start-master.sh"
-     else # SLAVE microservice
-          puts "WARNING : ASSUMES ALL DOCKER CONTAINERS KILLED, indexing ips from 1 as master !!!"
-          scale.vm.provision "shell", inline:"$SPARK_HOME/sbin/start-slave.sh -h spark://scale1.docker:7077"
-     end
-
-     scale.ssh.username = "root"
-     scale.ssh.port = 22
-     scale.vm.hostname = "scale#{i}.docker" 
-     scale.vm.synced_folder "./", "/scale-shared/"
-    end
-  end
-
+      
+    scale.vm.provision "shell", inline:"cat /vagrant/hosts >> /etc/hosts"  
+    scale.ssh.username = "root"
+    scale.ssh.port = 22
+    scale.vm.hostname = "scale#{i}.docker" 
 end
+
+verify
+config
+
+puts "-----"
+VAGRANTFILE_API_VERSION = "2"  
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+    # nodes definition
+    (1..$spark_num_instances).each do |i|
+        config.vm.define "scale#{i}" do |scale|
+            scale.vm.provider "docker" do |d|
+                docker_setup(d, i, scale, "spark/") 
+            end
+
+            scale.vm.provision "shell", inline:"echo \"export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk/\" >> $SPARK_HOME/conf/spark-env.sh"
+     
+            if "#{i}" == "1" # master micro servuce
+                scale.vm.provision "shell", inline:"$SPARK_HOME/sbin/start-master.sh"
+            else
+                puts "WARNING : assuming indexing for ips at 1" 
+            end 
+            scale.vm.provision "shell", inline:"$SPARK_HOME/sbin/start-slave.sh -h spark://scale1.docker:7077"
+            scale.vm.synced_folder "./", "/scale-shared/"
+        end 
+    end
+
+    (1..$cassandra_num_instances).each do |i|
+        config.vm.define "scale#{i}" do |scale|     
+            docker_setup(i, scale, "cassandra/")
+
+            if "#{i}" == "1" # MASTER microservice
+                scale.vm.provision "shell", inline:"$CASSANDRA_HOME/sbin/start-master.sh"
+            else # SLAVE microservice
+               puts "micro service for starting cassandra slave..."
+            end
+            scale.vm.synced_folder "./", "/scale-shared/"
+        end
+    end 
+end # end Vagrant
+
