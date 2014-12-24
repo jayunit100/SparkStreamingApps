@@ -72,15 +72,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     (1..$cassandra_num_instances).each do |i|
         config.vm.define "cassandra#{i}" do |scale|     
             scale.vm.provider "docker" do |d|
-                docker_setup(d, i, scale, "cassandra/", "cassandra#{i}.docker")
+                d.build_dir = "spark/"
+                d.create_args = ["--privileged=true", "-m", $conf["docker"]['memory_size'] + "m"]
+                d.remains_running = true
+                d.has_ssh = true
             end
-            puts "cassandra node = #{i}"            
             scale.vm.synced_folder "./", "/scale-shared/"
             scale.vm.provision "shell", inline:"cat /vagrant/hosts >> /etc/hosts"  
             scale.ssh.username = "root"
             scale.ssh.port = 22
-            scale.vm.hostname = "scale#{i}.docker"
-   
+            scale.vm.hostname = "cassandra#{i}.docker"
         end
     end 
 end # end Vagrant
