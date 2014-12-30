@@ -4,7 +4,7 @@
 require 'fileutils'
 
 # number of instances : First one is master.
-$spark_num_instances = 2
+$spark_num_instances = 0
 $cassandra_num_instances = 2
 spark_master_host = "scale1.docker" # see the logic below, we set hostname = scale#{i}.docker.
  
@@ -68,11 +68,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
        end 
     end
 
-        #luckily with cassandra we don't have master/slave architecture.
+    #luckily with cassandra we don't have master/slave architecture.
     (1..$cassandra_num_instances).each do |i|
         config.vm.define "cassandra#{i}" do |scale|     
             scale.vm.provider "docker" do |d|
-                d.build_dir = "spark/"
+                d.build_dir = "cassandra/"
                 d.create_args = ["--privileged=true", "-m", $conf["docker"]['memory_size'] + "m"]
                 d.remains_running = true
                 d.has_ssh = true
@@ -84,4 +84,4 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             scale.vm.hostname = "cassandra#{i}.docker"
         end
     end 
-end # end Vagrant
+end

@@ -8,7 +8,7 @@ RUN yum update -y
 RUN yum install -y java-1.7.0-openjdk-devel.x86_64
 
 # Spark  in /opt. default to hadoop 2.4 version.
-ADD http://d3kbcqa49mib13.cloudfront.net/spark-1.2.0-bin-hadoop2.4.tgz /opt/
+COPY spark-1.2.0-bin-hadoop2.4.tgz /opt/
 # ADD from HTTP doesn't unzip for us (https://github.com/docker/docker/issues/6353).  So untar here.
 RUN tar -xzf /opt/spark-1.2.0-bin-hadoop2.4.tgz -C /opt/
 RUN echo "SPARK_HOME=/opt/spark-1.2.0-bin-hadoop2.4" >> /etc/environment
