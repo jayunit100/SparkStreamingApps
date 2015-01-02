@@ -26,6 +26,7 @@ Vagrant.configure("2") do |config|
        end 
     end
 
+    ### WIP Not working yet , needs kubernetes.
     #luckily with cassandra we don't have master/slave architecture.
     (1..$cassandra_num_instances).each do |i|
         config.vm.define "cassandra#{i}" do |scale|     
