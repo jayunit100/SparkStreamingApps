@@ -4,66 +4,24 @@
 require 'fileutils'
 
 # number of instances : First one is master.
-$spark_num_instances = 0
-$cassandra_num_instances = 2
-spark_master_host = "scale1.docker" # see the logic below, we set hostname = scale#{i}.docker.
- 
-puts "Spark instances #{$spark_num_instances}"
-
-# Verify some basic stuff.
-def verify
-    if $spark_num_instances > 0 && $spark_num_instances < 2
-       puts "exiting ... spark instances must be > 1 for microservice architecture !"
-       #exit
-     end
-end
-def config
-    # load configuration from config.rb
-    configfile = File.join(File.dirname(__FILE__), "config.rb")
-    if File.exist?(configfile)
-      require configfile
-    end
-    require "yaml"
-    _config = YAML.load(File.open(File.join(File.dirname(__FILE__), "vagrantconfig.yaml"), File::RDONLY).read)
-    $conf = _config
-    ENV['VAGRANT_DEFAULT_PROVIDER'] ||= 'docker'
-    Vagrant.require_version ">= 1.6.0"
-end
- 
-### Takes an "int" and a "config.vm.define"
-### Object as inputs.
-### Defines the docker specific parameters.
-#def docker_setup(d, i, scale, builddir, hn)
-#end
-
-verify
-config
-
-VAGRANTFILE_API_VERSION = "2"  
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+$spark_num_instances = 2
+$cassandra_num_instances = 0
+Vagrant.configure("2") do |config|
     # nodes definition
     (1..$spark_num_instances).each do |i|
         config.vm.define "scale#{i}" do |scale|
             scale.vm.provider "docker" do |d|
                 d.build_dir = "spark/"
-                d.create_args = ["--privileged=true", "-m", $conf["docker"]['memory_size'] + "m"]
+                d.name = "scale#{i}"
+                d.create_args = ["--privileged=true"]
                 d.remains_running = true
-                d.has_ssh = true
                 if "#{i}" == "1"
                     d.ports = [ "4040:4040", "7707:7707" ] 
+                else
+                    d.create_args = d.create_args << "--link" << "scale1:scale1.docker"
                 end
             end
-            scale.vm.provision "shell", inline:"echo \"export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk/\" >> $SPARK_HOME/conf/spark-env.sh"
-            if "#{i}" == "1" # master micro serv
-                scale.vm.provision "shell", inline:"$SPARK_HOME/sbin/start-master.sh"
-            else
-                puts "WARNING : assuming indexing for ips at 1" 
-            end 
-            scale.vm.provision "shell", inline:"$SPARK_HOME/sbin/start-slave.sh -h spark://scale1.docker:7077"
             scale.vm.synced_folder "./", "/scale-shared/"
-            scale.vm.provision "shell", inline:"cat /vagrant/hosts >> /etc/hosts"  
-            scale.ssh.username = "root"
-            scale.ssh.port = 22
             scale.vm.hostname = "scale#{i}.docker"
        end 
     end
@@ -75,12 +33,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 d.build_dir = "cassandra/"
                 d.create_args = ["--privileged=true", "-m", $conf["docker"]['memory_size'] + "m"]
                 d.remains_running = true
-                d.has_ssh = true
             end
             scale.vm.synced_folder "./", "/scale-shared/"
-            scale.vm.provision "shell", inline:"cat /vagrant/hosts >> /etc/hosts"  
-            scale.ssh.username = "root"
-            scale.ssh.port = 22
             scale.vm.hostname = "cassandra#{i}.docker"
         end
     end 

@@ -1,4 +1,4 @@
-FROM centos:centos7
+FROM jvm
 RUN yum clean all
 RUN yum install -y tar yum-utils wget
 RUN yum-config-manager --save --setopt=fedora.skip_if_unavailable=true     
@@ -13,16 +13,11 @@ COPY spark-1.2.0-bin-hadoop2.4.tgz /opt/
 RUN tar -xzf /opt/spark-1.2.0-bin-hadoop2.4.tgz -C /opt/
 RUN echo "SPARK_HOME=/opt/spark-1.2.0-bin-hadoop2.4" >> /etc/environment
 
-#### Now install SSH so we can layer in the spark components.
-RUN yum -y install openssh-server openssh-clients sudo
-RUN sed -i.bak s/UsePAM\ yes/UsePAM\ no/ /etc/ssh/sshd_config
-RUN ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_dsa_key
-RUN ssh-keygen -q -N "" -t rsa -f /etc/ssh/ssh_host_rsa_key
-# requiretty off
-RUN sed -i.bak 's/requiretty/!requiretty/' /etc/sudoers
-# setup vagrant account
-RUN mkdir /root/.ssh/
-RUN chmod 0755 /root/.ssh
-RUN wget http://github.com/mitchellh/vagrant/raw/master/keys/vagrant.pub --no-check-certificate -O /root/.ssh/authorized_keys
-RUN chmod 0644 /root/.ssh/authorized_keys
-CMD /usr/sbin/sshd -D
+RUN echo "172.17.0.2	scale1.docker" >> /etc/hosts
+RUN echo "172.17.0.3	scale2.docker" >> /etc/hosts
+
+RUN echo "JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk/" >> /opt/spark-1.2.0-bin-hadoop2.4/conf/spark-env.sh
+
+### One dockerfile : Use hostname to decide wether or not slave of master... 
+#CMD ls
+CMD echo "XXXXXX" && cat /etc/hosts && echo "YYYY" && ip addr | grep 17 && hostname && if [[ `hostname` = 'scale1.docker' ]] ; then /opt/spark-1.2.0-bin-hadoop2.4/sbin/start-master.sh ; else ping -c 2 scale1.docker && /opt/spark-1.2.0-bin-hadoop2.4/sbin/start-slave.sh -h spark://scale1.docker:7077 ; fi ; tailf /opt/spark-1.2.0-bin-hadoop2.4/logs/*
