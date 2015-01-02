@@ -13,8 +13,8 @@ COPY spark-1.2.0-bin-hadoop2.4.tgz /opt/
 RUN tar -xzf /opt/spark-1.2.0-bin-hadoop2.4.tgz -C /opt/
 RUN echo "SPARK_HOME=/opt/spark-1.2.0-bin-hadoop2.4" >> /etc/environment
 
-RUN echo "172.17.0.2	scale1.docker" >> /etc/hosts
-RUN echo "172.17.0.3	scale2.docker" >> /etc/hosts
+#RUN echo "172.17.0.2	scale1.docker" >> /etc/hosts
+#RUN echo "172.17.0.3	scale2.docker" >> /etc/hosts
 
 RUN echo "JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk/" >> /opt/spark-1.2.0-bin-hadoop2.4/conf/spark-env.sh
 

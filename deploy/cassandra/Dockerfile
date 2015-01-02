@@ -12,6 +12,4 @@ COPY cassandra.yaml /opt/apache-cassandra-2.0.11-bin/conf/cassandra.yaml
 
 # setup vagrant account
 # update hosts file... 
-COPY hosts /etc/hosts2
-RUN cat /etc/hosts2 >> /etc/hosts
 CMD /opt/apache-cassandra-2.0.11/bin/cassandra -f
