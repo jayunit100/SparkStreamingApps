@@ -11,6 +11,5 @@ class TestSpark {
   def test(){
     //very simple unit test.  we will improve it eventually.
     SparkApp1.main(Array("1"));
-
   }
 }

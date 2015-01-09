@@ -1,0 +1,17 @@
+This repository provides a demo of how to
+build a generic Twitter application based on
+spark streaming.
+
+It serves 3 purposes.
+
+- Example of how to use spark streaming.
+- Example of how to stream twitter data.
+- Example of how to move data between spark streaming and cassandra.
+
+The spark streaming application is implemented using
+a generic framework, in the tweetstream package.
+
+An example of the way that framework is used
+is in the ctakes package.
+
+
