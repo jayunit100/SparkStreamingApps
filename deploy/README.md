@@ -33,3 +33,13 @@ once started you can do some basic tests.
 
 Note that tests have been automated in the run-* script...
 
+# Debugging 
+
+## If one of the microservices isnt starting...
+
+Since the vagrant abstraction makes things complex, if there is a failure in an individual microservice, 
+you can test it by running the Dockerfile in isolation.  For example
+
+``` docker build -t cass_img_1 cassandra/ &&  docker run -t -i -h scale1.docker --name scale1 cass_img_1 ```
+
+
