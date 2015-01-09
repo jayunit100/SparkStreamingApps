@@ -15,8 +15,7 @@ Alternatively, you can use the individual Dockerfiles and modify them - they are
 
 # Instructions.
 
-BEFORE running, however, run ```setup.sh```  
-
+BEFORE running, however, run ```run-setup.sh```  
 This is necessary to cache the Tarballs efficiently.
 Also, this script builds the base Dockerfile (JDK and nothing else).
 
@@ -32,4 +31,5 @@ once started you can do some basic tests.
 ```/opt/apache-cassandra.../bin/cassandra-cli``` followed by ```connect cassandra1.docker/9160``` .  The connection should succeed, and then you can do things like create keyspaces etc.
 
 
+Note that tests have been automated in the run-* script...
 
