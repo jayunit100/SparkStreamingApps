@@ -1,6 +1,6 @@
 import com.datastax.spark.connector.cql.CassandraConnector
 import org.apache.spark.SparkConf
-import sparkapps.tweetstream.{TwitterAppTemplate, TwitterStreamingApp, MockInputDStream, Processor}
+import sparkapps.tweetstream.{TwitterAppTemplate, MockInputDStream}
 
 /**
  *
@@ -13,14 +13,9 @@ import sparkapps.tweetstream.{TwitterAppTemplate, TwitterStreamingApp, MockInput
  * 3) ETLs function is sent as an argument to the Processor.
  *
  */
-class TestTwitterETL {
-
-
+class TestTwitterCassandraETL {
   /**
-   * Add other examples.... i.e. hbase ETL, here.
-   */
-
-  /**
+   *
    * Here is an implementation of Cassandra based ETL.
    */
   @org.junit.Test
@@ -33,6 +28,7 @@ class TestTwitterETL {
       val conf = new SparkConf()
         .setAppName(this.getClass.getSimpleName + "" + System.currentTimeMillis())
         .setMaster("local[2]")
+        //using https://github.com/jayunit100/vagrant-cassandra w/ port forwarding to 9042 for this to work.
         .set("spark.cassandra.connection.host", "127.0.0.1")
         .set("spark.cassandra.connection.native.port","9042")
 

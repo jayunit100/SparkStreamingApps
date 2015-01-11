@@ -171,7 +171,10 @@ object Driver {
       /**
        * The function which creates the DStream, given a context.
        */
-    {ssc=> TwitterInputDStreamCTakes(ssc, Utils.getAuth, null, 1)_ },
+    {
+      ssc=>
+        TwitterInputDStreamCTakes(ssc, Utils.getAuth, null, 1)
+    },
       /**
       *  The function which Process outputs from the DStream,
        * given a RDD and a sparkConfiguration.

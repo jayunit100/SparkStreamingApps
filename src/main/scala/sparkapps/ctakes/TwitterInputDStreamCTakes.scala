@@ -134,4 +134,3 @@ case class TwitterInputDStreamCTakes(
       twitterStream = newTwitterStream
     }
   }
-

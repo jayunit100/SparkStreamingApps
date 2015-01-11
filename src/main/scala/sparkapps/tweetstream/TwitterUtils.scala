@@ -22,15 +22,14 @@ object TwitterUtils {
    * @param filters Set of filter strings to get only those tweets that match them
    * @param storageLevel Storage level to use for storing the received objects
    */
-  def createStream(
-                    ssc: StreamingContext,
+  def createStream( ssc: StreamingContext,
                     twitterAuth: Option[Authorization],
                     filters: Seq[String] = Nil,
                     storageLevel: StorageLevel = StorageLevel.MEMORY_AND_DISK_SER_2
                     ): ReceiverInputDStream[Status] =
   {
     //2 second slide duratoin
-    new TwitterInputDStreamCTakes(ssc, twitterAuth, filters, storageLevel, 2)
+    new TwitterInputDStreamCTakes(ssc, twitterAuth, filters, 2)
 
   }
 
