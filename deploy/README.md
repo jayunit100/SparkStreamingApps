@@ -2,6 +2,11 @@
 
 This repo separates docker instances into microservices.
 
+# In a hurry ?
+
+Just run "run-up-test.sh" .  This will clear all containers that are running, so be carefull !
+
+
 # Overview
 
 This repository is a WIP that spins up spark and cassandra microservices and 
