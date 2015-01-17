@@ -20,4 +20,9 @@ RUN echo "JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk/" >> /opt/spark-1.2.0-bin-ha
 
 ### One dockerfile : Use hostname to decide wether or not slave of master... 
 #CMD ls
-CMD echo "XXXXXX" && cat /etc/hosts && echo "YYYY" && ip addr | grep 17 && hostname && if [[ `hostname` = 'scale1.docker' ]] ; then /opt/spark-1.2.0-bin-hadoop2.4/sbin/start-master.sh ; else ping -c 2 scale1.docker && /opt/spark-1.2.0-bin-hadoop2.4/sbin/start-slave.sh -h spark://scale1.docker:7077 ; fi ; tailf /opt/spark-1.2.0-bin-hadoop2.4/logs/*
+
+#CMD echo "XXXXXX" && cat /etc/hosts && echo "YYYY" && ip addr | grep 17 && hostname && if [[ `hostname` = 'scale1.docker' ]] ; then /opt/spark-1.2.0-bin-hadoop2.4/sbin/start-master.sh ; else ping -c 2 scale1.docker && /opt/spark-1.2.0-bin-hadoop2.4/sbin/start-slave.sh -h spark://scale1.docker:7077 ; fi ; tailf /opt/spark-1.2.0-bin-hadoop2.4/logs/*
+
+ADD run.sh /opt/run.sh
+# CMD /opt/run.sh
+# CMD /opt/spark-1.2.0-bin-hadoop2.4/sbin/start-master.sh
