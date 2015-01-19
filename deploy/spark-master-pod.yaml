@@ -1,4 +1,4 @@
-id: spark
+id: spark-master
 kind: Pod
 apiVersion: v1beta1
 desiredState:
@@ -11,9 +11,10 @@ desiredState:
         command:
            - /bin/bash
            - /opt/run.sh
+           - master
         cpu: 1000
         ports:
-          - name: sp
+          - name: spark-master
             containerPort: 7077
 labels:
   name: spark-master
