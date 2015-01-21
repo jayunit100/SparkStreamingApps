@@ -21,6 +21,7 @@ else
     # One arg expected when launching kubernetes (master or slave)
     if [ $1 = "slave" ]; then 
        echo "START SLAVE pointing to ${SPARK_MASTER_SERVICE_HOST} " 
+       # SPARK_MASTER_SERVICE_HOST is 1.2.3.4:7077
        /opt/spark-1.2.0-bin-hadoop2.4/sbin/start-slave.sh -h spark://${SPARK_MASTER_SERVICE_HOST}:7077
     # master
     else 
