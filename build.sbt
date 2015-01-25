@@ -4,17 +4,44 @@ version := "1.0"
 
 scalaVersion := "2.10.4"
 
+net.virtualvoid.sbt.graph.Plugin.graphSettings
+
+//packSettings
+
+
+mergeStrategy in assembly := { 
+      case n if n.startsWith("META-INF/eclipse.inf") => MergeStrategy.discard
+        case n if n.startsWith("META-INF/ECLIPSEF.RSA") => MergeStrategy.discard
+          case n if n.startsWith("META-INF/ECLIPSE_.RSA") => MergeStrategy.discard
+            case n if n.startsWith("META-INF/ECLIPSEF.SF") => MergeStrategy.discard
+              case n if n.startsWith("META-INF/ECLIPSE_.SF") => MergeStrategy.discard
+                case n if n.startsWith("META-INF/MANIFEST.MF") => MergeStrategy.discard
+                  case n if n.startsWith("META-INF/NOTICE.txt") => MergeStrategy.discard
+                    case n if n.startsWith("META-INF/NOTICE") => MergeStrategy.discard
+                      case n if n.startsWith("META-INF/LICENSE.txt") => MergeStrategy.discard
+                        case n if n.startsWith("META-INF/LICENSE") => MergeStrategy.discard
+                          case n if n.startsWith("rootdoc.txt") => MergeStrategy.discard
+                            case n if n.startsWith("readme.html") => MergeStrategy.discard
+                              case n if n.startsWith("readme.txt") => MergeStrategy.discard
+                                case n if n.startsWith("library.properties") => MergeStrategy.discard
+                                  case n if n.startsWith("license.html") => MergeStrategy.discard
+                                    case n if n.startsWith("about.html") => MergeStrategy.discard
+                                      case _ => MergeStrategy.last
+}
+
 libraryDependencies += "com.datastax.spark" %% "spark-cassandra-connector" % "1.1.0-beta1" withSources() withJavadoc()
 
 libraryDependencies += "org.apache.spark" %% "spark-core" % "1.1.0"
+
+// #libraryDependencies += "org.apache.spark" %% "spark-core" % "1.1.0"
 
 libraryDependencies +=  "org.scalatest" % "scalatest_2.10.0-M4" % "1.9-2.10.0-M4-B1"
 
 libraryDependencies +=  "junit" % "junit" % "4.8.1" % "test"
 
-libraryDependencies += "org.apache.spark" %% "spark-mllib" % "1.1.0"
+//libraryDependencies += "org.apache.spark" %% "spark-mllib" % "1.1.0"
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "1.1.0"
+//libraryDependencies += "org.apache.spark" %% "spark-sql" % "1.1.0"
 
 libraryDependencies += "org.apache.spark" %% "spark-streaming" % "1.1.0"
 
