@@ -188,8 +188,11 @@ object Driver {
               Thread.sleep(1)
               transactions.foreach({
                 xN =>
+                  System.out.println("Running Cassandra Insert..." + xN)
+                  System.out.println("Note that this can fail if cassandra isnt working...")
                   val xNtxt=xN.toString+" "+xN.getText;
-                  session.executeAsync(s"INSERT INTO streaming_test.key_value (key, value) VALUES ('$xNtxt' , $x)")}
+                  session.executeAsync(s"INSERT INTO streaming_test.key_value (key, value) VALUES ('$xNtxt' , $x)")
+              }
               )
               true;
             }
