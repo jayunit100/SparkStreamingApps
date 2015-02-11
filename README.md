@@ -1,4 +1,13 @@
-This is a spark SBT Template.
+This repo has two different resources.
+
+- testing of spark docker containers, orchestrated via vagrant.
+- spark streaming blueprint applications.
+
+If interested just in the docker containers, checkout the ```deploy/``` directory. 
+
+These are mostly unrelated.  They just happen to be in the same repo. 
+
+# Spark Streaming Blueprint apps. 
 
 To use it, import it into INtelliJ or your favorite IDE as an SBT project.
 
@@ -17,7 +26,7 @@ inside your idea and also in standalone mode.
 
 1. Change the .git/config to  point to your repository.
 
-# Running in a real cluster
+# Running in a real cluster 
 
 - Set up a spark cluster w/ cassandra slaves.  There is a WIP project under deploy/ which sets scaffolding for this 
 up using dockerfiles and vagrant to create a n-node spark cluster w/ a cassandra sink.  
@@ -28,6 +37,7 @@ up using dockerfiles and vagrant to create a n-node spark cluster w/ a cassandra
 into your machine that submits the spark jobs).
 
 - spark-submit the application jar w/ desired class name (details coming soon).
+
 
 
 
