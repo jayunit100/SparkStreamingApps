@@ -53,13 +53,22 @@ libraryDependencies += "org.twitter4j" % "twitter4j-core" % "3.0.3"
 
 libraryDependencies += "commons-cli" % "commons-cli" % "1.2"
 
-libraryDependencies += "org.apache.ctakes" % "ctakes-core" % "3.2.0"
+libraryDependencies += "org.apache.ctakes" % "ctakes-core" % "3.2.1"
 
-libraryDependencies += "org.apache.ctakes" % "ctakes-core-res" % "3.2.0"
+libraryDependencies += "org.apache.ctakes" % "ctakes-core-res" % "3.2.1"
 
-libraryDependencies += "org.apache.ctakes" % "ctakes-constituency-parser" % "3.2.0"
+libraryDependencies += "org.apache.ctakes" % "ctakes-constituency-parser" % "3.2.1"
 
-libraryDependencies += "org.apache.ctakes" % "ctakes-clinical-pipeline" % "3.2.0"
+libraryDependencies += "org.apache.ctakes" % "ctakes-clinical-pipeline" % "3.2.1"
+
+libraryDependencies += "org.apache.ctakes" % "ctakes-dictionary-lookup-fast" % "3.2.1"
+
+libraryDependencies += "org.apache.ctakes" % "ctakes-drug-ner" % "3.2.1"
+
+libraryDependencies += "org.apache.ctakes" % "ctakes-assertion" % "3.2.1"
+
+
+javaOptions += "-Xmx2G"
 
 resolvers += "Akka Repository" at "http://repo.akka.io/releases/"
 
