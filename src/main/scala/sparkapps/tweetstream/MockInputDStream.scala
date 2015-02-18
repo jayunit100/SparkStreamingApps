@@ -7,9 +7,9 @@ import java.util.concurrent.{Callable, FutureTask}
 import org.apache.ctakes.core.fsm.token.BaseToken
 import org.apache.uima.analysis_engine.AnalysisEngineDescription
 import org.apache.uima.jcas.JCas
-import org.uimafit.factory.JCasFactory
-import org.uimafit.pipeline.SimplePipeline
-import org.uimafit.util.JCasUtil
+import org.apache.uima.fit.factory.JCasFactory
+import org.apache.uima.fit.pipeline.SimplePipeline
+import org.apache.uima.fit.util.JCasUtil
 import twitter4j._
 import twitter4j.auth.Authorization
 import twitter4j.conf.ConfigurationBuilder
