@@ -22,99 +22,17 @@ object TwitterUtils {
    * @param filters Set of filter strings to get only those tweets that match them
    * @param storageLevel Storage level to use for storing the received objects
    */
-  def createStream( ssc: StreamingContext,
+  def createStream( slideSeconds:Int,
+                    ssc: StreamingContext,
                     twitterAuth: Option[Authorization],
                     filters: Seq[String] = Nil,
                     storageLevel: StorageLevel = StorageLevel.MEMORY_AND_DISK_SER_2
                     ): ReceiverInputDStream[Status] =
   {
     //2 second slide duratoin
-    new TwitterInputDStreamCTakes(ssc, twitterAuth, filters, 2)
+    System.out.println("slideSeconds " + slideSeconds);
+    new TwitterInputDStreamCTakes( ssc, twitterAuth, filters, slideSeconds)
 
   }
-
-  /**
-   * Create a input stream that returns tweets received from Twitter using Twitter4J's default
-   * OAuth authentication; this requires the system properties twitter4j.oauth.consumerKey,
-   * twitter4j.oauth.consumerSecret, twitter4j.oauth.accessToken and
-   * twitter4j.oauth.accessTokenSecret.
-   * Storage level of the data will be the default StorageLevel.MEMORY_AND_DISK_SER_2.
-   * @param jssc   JavaStreamingContext object
-   */
-  def createStream(jssc: JavaStreamingContext): JavaReceiverInputDStream[Status] = {
-    createStream(jssc.ssc, None)
-  }
-
-  /**
-   * Create a input stream that returns tweets received from Twitter using Twitter4J's default
-   * OAuth authentication; this requires the system properties twitter4j.oauth.consumerKey,
-   * twitter4j.oauth.consumerSecret, twitter4j.oauth.accessToken and
-   * twitter4j.oauth.accessTokenSecret.
-   * Storage level of the data will be the default StorageLevel.MEMORY_AND_DISK_SER_2.
-   * @param jssc    JavaStreamingContext object
-   * @param filters Set of filter strings to get only those tweets that match them
-   */
-  def createStream(jssc: JavaStreamingContext, filters: Array[String]
-                    ): JavaReceiverInputDStream[Status] = {
-    createStream(jssc.ssc, None, filters)
-  }
-
-  /**
-   * Create a input stream that returns tweets received from Twitter using Twitter4J's default
-   * OAuth authentication; this requires the system properties twitter4j.oauth.consumerKey,
-   * twitter4j.oauth.consumerSecret, twitter4j.oauth.accessToken and
-   * twitter4j.oauth.accessTokenSecret.
-   * @param jssc         JavaStreamingContext object
-   * @param filters      Set of filter strings to get only those tweets that match them
-   * @param storageLevel Storage level to use for storing the received objects
-   */
-  def createStream(
-                    jssc: JavaStreamingContext,
-                    filters: Array[String],
-                    storageLevel: StorageLevel
-                    ): JavaReceiverInputDStream[Status] = {
-    createStream(jssc.ssc, None, filters, storageLevel)
-  }
-
-  /**
-   * Create a input stream that returns tweets received from Twitter.
-   * Storage level of the data will be the default StorageLevel.MEMORY_AND_DISK_SER_2.
-   * @param jssc        JavaStreamingContext object
-   * @param twitterAuth Twitter4J Authorization
-   */
-  def createStream(jssc: JavaStreamingContext, twitterAuth: Authorization
-                    ): JavaReceiverInputDStream[Status] = {
-    createStream(jssc.ssc, Some(twitterAuth))
-  }
-
-  /**
-   * Create a input stream that returns tweets received from Twitter.
-   * Storage level of the data will be the default StorageLevel.MEMORY_AND_DISK_SER_2.
-   * @param jssc        JavaStreamingContext object
-   * @param twitterAuth Twitter4J Authorization
-   * @param filters     Set of filter strings to get only those tweets that match them
-   */
-  def createStream(
-                    jssc: JavaStreamingContext,
-                    twitterAuth: Authorization,
-                    filters: Array[String]
-                    ): JavaReceiverInputDStream[Status] = {
-    createStream(jssc.ssc, Some(twitterAuth), filters)
-  }
-
-  /**
-   * Create a input stream that returns tweets received from Twitter.
-   * @param jssc         JavaStreamingContext object
-   * @param twitterAuth  Twitter4J Authorization object
-   * @param filters      Set of filter strings to get only those tweets that match them
-   * @param storageLevel Storage level to use for storing the received objects
-   */
-  def createStream(
-                    jssc: JavaStreamingContext,
-                    twitterAuth: Authorization,
-                    filters: Array[String],
-                    storageLevel: StorageLevel
-                    ): JavaReceiverInputDStream[Status] = {
-    createStream(jssc.ssc, Some(twitterAuth), filters, storageLevel)
-  }
+  //other implementations deleted, grab them from the upstream code if needed.
 }

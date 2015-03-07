@@ -40,7 +40,7 @@ class TestTwitterCassandraETL {
       }
 
 
-      TwitterAppTemplate.startStream(
+      TwitterAppTemplate.startStream(1,
         conf,
         sparkapps.tweetstream.MockInputDStream(1)_, // <-- how to make this curried?
         {

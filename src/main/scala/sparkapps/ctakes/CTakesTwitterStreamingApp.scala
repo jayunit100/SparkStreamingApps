@@ -46,7 +46,7 @@ object Driver {
             return Some(x.split("=")(1));
           }
       }
-      System.err.println("Uhoh ! Didnt see the twitter param in /tmp/twitter for " + twitterParam );
+      System.err.println("Uhoh ! Didn't see the twitter param in /tmp/twitter for " + twitterParam );
       None
     }
 
@@ -80,9 +80,9 @@ object Driver {
       "or it will be written for you interactively....")
     if(args.length==0) {
       val defs = Array(
-        "--outputDirectory", "/tmp/OUTPUT_" + System.currentTimeMillis(),
+        "--outputDirectory", "/tmp/OUTPUT_" + System.currentTimeMillis(), //not used...
         "--numtweets", "10",
-        "--intervals", "10",
+        "--intervals", "60", /// this is what determines intervals......
         "--partitions", "1",
         //added as system properties.
         /** qoute at the end is for type inference **/
@@ -109,6 +109,7 @@ object Driver {
     Utils.IntParam(partitionsEachInterval)) =
       Parser.parse(args)
 
+    System.out.println("interval seconds " + intervalSecs);
     verifyAndRun(intervalSecs,numTweetsToCollect, new File(outputDirectory), partitionsEachInterval);
   }
 
@@ -156,29 +157,29 @@ object Driver {
     println("Initializing Streaming Spark Context...")
 
     val conf = new SparkConf()
-      .setAppName(this.getClass.getSimpleName+""+System.currentTimeMillis())
+      .setAppName(this.getClass.getSimpleName + "" + System.currentTimeMillis())
       .setMaster("local[2]")
     val sCon = new SparkContext(conf)
     val ssCon = new StreamingContext(sCon, Seconds(intervalSecs))
 
+    TwitterAppTemplate
+      .startStream2(
+        intervalSecs,
+        conf,
+        {
+          sssc => TwitterInputDStreamCTakes(sssc, Utils.getAuth, null, intervalSecs)},"/tmp/twitterfeed/");
+        }
     /**
      * Here is the logic of the entire application.
      * We use the generic streaming utility to do the
      * spark streaming glue.
-     */
+
     TwitterAppTemplate.startStream(
       conf,
-      /**
-       * The function which creates the DStream, given a context.
-       */
     {
       ssc=>
-        TwitterInputDStreamCTakes(ssc, Utils.getAuth, null, 1)
+        TwitterInputDStreamCTakes(ssCon, Utils.getAuth, null, 1)
     },
-      /**
-      *  The function which Process outputs from the DStream,
-       * given a RDD and a sparkConfiguration.
-      */
       {
         (transactions,sparkConf) =>
           //assumes session.
@@ -199,5 +200,5 @@ object Driver {
           }
       }
     )
-  }
+     */
 }

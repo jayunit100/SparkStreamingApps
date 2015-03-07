@@ -32,40 +32,71 @@ import twitter4j.Status
 object TwitterAppTemplate {
 
   import org.apache.spark.rdd;
-  val total=10;
   var gson = new Gson()
-  var intervalSecs = 5;
 
-  def startStream(sparkConf:SparkConf,
-                  stream:(StreamingContext => ReceiverInputDStream[Status]),
-                  pluggableETLFunction:(Array[Status],SparkConf)=>Boolean) = {
-    val sc=new SparkContext(sparkConf);
+  def startStream2(slideSeconds:Int, sparkConf: SparkConf,
+                  stream: (StreamingContext => ReceiverInputDStream[Status]),
+                  fileNamePref: String) = {
+    val sc = new SparkContext(sparkConf);
 
-    val ssc=new StreamingContext(sc, Seconds(intervalSecs))
+    val ssc = new StreamingContext(sc, Seconds(slideSeconds))
+
+    var count = 0;
+    println("Initializing Streaming Spark Context...  slider window "+slideSeconds)
+
+    //Without this, nothing will execute: Streaming context's require an attached consumer to run.
+    TwitterUtils.createStream(
+      slideSeconds,
+      ssc,
+      Utils.getAuth,
+      Seq("Abilify,Nexium,Humira,Crestor,Advair Diskus,Enbrel,"+
+        "Remicade,Cymbalta,Copaxone,Neulasta,Lantus Solostar,"+
+        "Rituxan,Spiriva Handihaler,Januvia,Atripla,Lantus,Oxycontin,"+
+        "Celebrex,Celebrex,Diovan,Gleevec,Herceptin,Lucentis,Namenda,"+
+        "Truvada,Enbrel,Ranexa,Humalog,Novolog,Tamiflu,Januvia,Namenda,"+
+        "Benicar,Nasonex,Suboxone,Symbicort,Bystolic,Oxycontin,Xarelto"),
+
+    StorageLevel.MEMORY_AND_DISK).saveAsTextFiles(fileNamePref)
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+    sc.stop()
+    System.exit(0)
+
+  }
+
+  def startStream(slideSeconds:Int, sparkConf: SparkConf,
+                  stream: (StreamingContext => ReceiverInputDStream[Status]),
+                  pluggableETLFunction: (Array[Status], SparkConf) => Boolean) = {
+    val sc = new SparkContext(sparkConf);
+
+    val ssc = new StreamingContext(sc, Seconds(slideSeconds))
 
     var count = 0;
     println("Initializing Streaming Spark Context... 4")
 
-
     //Without this, nothing will execute: Streaming context's require an attached consumer to run.
     TwitterUtils.createStream(
+    slideSeconds,
       ssc,
       Utils.getAuth,
       Seq("medical"),
       StorageLevel.MEMORY_AND_DISK)
-        .foreachRDD(rdd => {
-          count+=1
-          if (count>2) {
-            pluggableETLFunction(rdd.collect(),
-            ///<<<<<<<<<< TODO ::: is this still NULL
-              sparkConf)
-            ssc.stop()
-            sc.stop();
-            System.exit(0)
-          }
-    })
+      .foreachRDD(rdd => {
+          pluggableETLFunction(rdd.collect(), sparkConf)
+
+      })
 
     ssc.start()
     ssc.awaitTermination()
+    ssc.stop()
+    sc.stop()
+    System.exit(0)
   }
+
+
+
+
+
 }

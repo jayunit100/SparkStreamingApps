@@ -21,12 +21,12 @@ import twitter4j.conf.ConfigurationBuilder
   * properties twitter4j.oauth.consumerKey, .consumerSecret, .accessToken and .accessTokenSecret.
   */
 case class TwitterInputDStreamCTakes(
-                                 @transient ssc_ : StreamingContext,
+                             @transient ssc_ : StreamingContext,
                              twitterAuth: Option[Authorization],
                              filters: Seq[String],
                              slideSeconds: Int) extends ReceiverInputDStream[Status](ssc_) {
 
-    override def slideDuration(): Duration = {
+     override def slideDuration(): Duration = {
       System.out.println("returning duration seconds = " + slideSeconds );
       return Seconds(slideSeconds)
     }
@@ -49,17 +49,20 @@ case class TwitterInputDStreamCTakes(
                          ) extends Receiver[Status](storageLevel) with Logging {
 
     @volatile private var twitterStream: TwitterStream = _
-    var total=0;
+
     override def store(status:Status): Unit = {
         super.store(status)
     }
-
+    var received = 0;
     def statusListener():StatusListener = {
       new StatusListener {
         def onStatus(status: Status) = {
-            System.out.println("Tweet  : "+status.getText)
-            store(status)
+          received=received+1;
+              System.out.println("Tweet  # " + status.getText)
+              store(status)
+              received=received+1;
         }
+
         def onDeletionNotice(statusDeletionNotice: StatusDeletionNotice) {}
 
         def onTrackLimitationNotice(i: Int) {}
@@ -103,6 +106,7 @@ case class TwitterInputDStreamCTakes(
                   newTwitterStream.sample()
                 }
                 setTwitterStream(newTwitterStream)
+
 
                 logInfo("Twitter receiver started")
               }
