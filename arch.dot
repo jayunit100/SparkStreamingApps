@@ -1,0 +1,22 @@
+digraph G {
+
+subgraph cluster_a {
+
+   sparkConf -> sparkContext -> sparkStreamingContext ;
+   sparkStreamingContext -> tweetStream ;
+   drugNames -> tweetStream [label="Abilify,Nexium,Humira,Crestor,Advair\nDiskus,Enbrel,Remicade,Cymbalta,\nCopaxone,Neulasta,Lantus,Solostar,Rituxan,Spiriva,Handihaler,Januvia,Atripla,Lantus,Oxycontin,\nCelebrex,Celebrex,Diovan,Gleevec,Herceptin,Lucentis,Namenda,\nTruvada,Enbrel,Ranexa,Humalog,Novolog,Tamiflu,Januvia,Namenda,Benicar\n,Nasonex,Suboxone,Symbicort,Bystolic,Oxycontin,Xarelto"];
+   StorageParameters -> tweetStream [label="/mnt/glusterfs/tweets/"];
+   tweetStream -> TwitterInputDStream ;
+   TwitterInputDStream -> saveAsText [label="tweetStream.saveAsTextFile(...)"];
+   TwitterInputDStream -> forEachRDD [label="session => {transactions.foreach({\nsession.executeAsync(..\nINSERT INTO streaming_test.key_value \n(key, value) VALUES ..."];
+
+}
+
+subgraph ctakes {
+
+   saveAsText -> BatchJob ;
+   forEachRDD -> In
+
+}
+
+}

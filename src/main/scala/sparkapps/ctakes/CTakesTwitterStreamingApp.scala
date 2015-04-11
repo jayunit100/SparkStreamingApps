@@ -13,6 +13,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
 import sparkapps.ctakes.TwitterInputDStreamCTakes
 import sparkapps.tweetstream._
+import twitter4j.Status
 import twitter4j.auth.{OAuthSupport, Authorization}
 import scala.runtime.ScalaRunTime._
 /**
@@ -80,10 +81,11 @@ object Driver {
       "or it will be written for you interactively....")
     if(args.length==0) {
       val defs = Array(
-        "--outputDirectory", "/tmp/OUTPUT_" + System.currentTimeMillis(), //not used...
+        "--outputDirectory", "/tmp/tweets", //only used for the file endpoint impl.
         "--numtweets", "10",
         "--intervals", "60", /// this is what determines intervals......
         "--partitions", "1",
+        "--master", "local[2]",
         //added as system properties.
         /** qoute at the end is for type inference **/
         "twitter4j.oauth." + Parser.CONSUMER_KEY, readParameter(Parser.CONSUMER_KEY).getOrElse({failTwFile(); ""}),
@@ -106,8 +108,8 @@ object Driver {
     Utils.IntParam(intervalSecs),
     Utils.IntParam(numTweetsToCollect),
     outputDirectory,
-    Utils.IntParam(partitionsEachInterval)) =
-      Parser.parse(args)
+    Utils.IntParam(partitionsEachInterval),
+    master) = Parser.parse(args)
 
     System.out.println("interval seconds " + intervalSecs);
     verifyAndRun(intervalSecs,numTweetsToCollect, new File(outputDirectory), partitionsEachInterval);
@@ -132,7 +134,8 @@ object Driver {
       "twitter4j.oauth.consumerKey",
       "twitter4j.oauth.consumerSecret",
       "twitter4j.oauth.accessToken",
-      "twitter4j.oauth.accessTokenSecret")
+      "twitter4j.oauth.accessTokenSecret"
+     )
     )
   }
 
@@ -150,55 +153,78 @@ object Driver {
       System.err.println("ERROR - %s already exists: delete or specify another directory".format(outputDirectory))
       System.exit(2)
     }
-    startStream(intervalSecs,partitionsEachInterval,numTweetsToCollect);
+    runDISK("local[2]", intervalSecs, partitionsEachInterval, numTweetsToCollect, outputDirectory);
+
+    //runCassandra(....)
   }
 
-  def startStream(intervalSecs:Int, partitionsEachInterval:Int, numTweetsToCollect:Int) = {
+  def streamingFunction(sssc: StreamingContext): ReceiverInputDStream[Status] = {
+    TwitterUtils.createStream(
+          sssc,
+          Utils.getAuth,
+          Seq(
+            "Abilify,Nexium,Humira,Crestor,Advair Diskus,Enbrel,"+
+              "Remicade,Cymbalta,Copaxone,Neulasta,Lantus Solostar,"+
+              "Rituxan,Spiriva Handihaler,Januvia,Atripla,Lantus,Oxycontin,"+
+              "Celebrex,Celebrex,Diovan,Gleevec,Herceptin,Lucentis,Namenda,"+
+              "Truvada,Enbrel,Ranexa,Humalog,Novolog,Tamiflu,Januvia,Namenda,"+
+              "Benicar,Nasonex,Suboxone,Symbicort,Bystolic,Oxycontin,Xarelto"),
+          StorageLevel.MEMORY_AND_DISK)
+  }
+
+  def runDISK(master:String, intervalSecs:Int, partitionsEachInterval:Int, numTweetsToCollect:Int, file:File) = {
     println("Initializing Streaming Spark Context...")
 
     val conf = new SparkConf()
       .setAppName(this.getClass.getSimpleName + "" + System.currentTimeMillis())
-      .setMaster("local[2]")
+      .setMaster(master)
     val sCon = new SparkContext(conf)
-    val ssCon = new StreamingContext(sCon, Seconds(intervalSecs))
+    val ssc = new StreamingContext(sCon, Seconds(10));
+    val tweetStream: ReceiverInputDStream[Status] = streamingFunction(ssc);
 
-    TwitterAppTemplate
-      .startStream2(
-        intervalSecs,
-        conf,
-        {
-          sssc => TwitterInputDStreamCTakes(sssc, Utils.getAuth, null, intervalSecs)},"/tmp/twitterfeed/");
+    //lots of empty files if 10 second interval, obviously.
+    tweetStream.saveAsTextFiles(file.getAbsolutePath)
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+    System.exit(0)
+  }
+
+  /**
+   * Example of cassandra implementation.
+   * Not yet supported by the app but easy to add
+   * by simply updating the parameters for setting up the cassandra connector etc.
+   */
+  def runCassandra(master:String, intervalSecs:Int, partitionsEachInterval:Int, numTweetsToCollect:Int) = {
+    println("Initializing Streaming Spark Context...")
+
+    val conf = new SparkConf()
+      .setAppName(this.getClass.getSimpleName + "" + System.currentTimeMillis())
+      .setMaster(master)
+    val sCon = new SparkContext(conf)
+    val ssc = new StreamingContext(sCon, Seconds(10));
+    val tweetStream: ReceiverInputDStream[Status] = streamingFunction(ssc);
+
+    tweetStream.foreachRDD( transactions => {
+        CassandraConnector(conf).withSessionDo {
+        session => {
+          val x=1
+          Thread.sleep(1)
+          transactions.foreach({
+            xN =>
+              System.out.println("Running Cassandra Insert..." + xN)
+              System.out.println("Note that this can fail if cassandra isnt working...")
+              val xNtxt=xN.toString+" "+xN.getText;
+              session.executeAsync(s"INSERT INTO streaming_test.key_value (key, value) VALUES ('$xNtxt' , $x)")
+          })
         }
-    /**
-     * Here is the logic of the entire application.
-     * We use the generic streaming utility to do the
-     * spark streaming glue.
-
-    TwitterAppTemplate.startStream(
-      conf,
-    {
-      ssc=>
-        TwitterInputDStreamCTakes(ssCon, Utils.getAuth, null, 1)
-    },
-      {
-        (transactions,sparkConf) =>
-          //assumes session.
-          CassandraConnector(sparkConf).withSessionDo {
-            session => {
-              val x=1
-              Thread.sleep(1)
-              transactions.foreach({
-                xN =>
-                  System.out.println("Running Cassandra Insert..." + xN)
-                  System.out.println("Note that this can fail if cassandra isnt working...")
-                  val xNtxt=xN.toString+" "+xN.getText;
-                  session.executeAsync(s"INSERT INTO streaming_test.key_value (key, value) VALUES ('$xNtxt' , $x)")
-              }
-              )
-              true;
-            }
-          }
       }
-    )
-     */
+    })
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+    System.exit(0)
+
+  }
+
 }

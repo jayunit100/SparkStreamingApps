@@ -1,6 +1,6 @@
 import com.datastax.spark.connector.cql.CassandraConnector
 import org.apache.spark.SparkConf
-import sparkapps.tweetstream.{TwitterAppTemplate, MockInputDStream}
+import sparkapps.tweetstream.{AllDrugsTwitterAppImplementation, MockInputDStream}
 
 /**
  *
@@ -40,7 +40,7 @@ class TestTwitterCassandraETL {
       }
 
 
-      TwitterAppTemplate.startStream(1,
+      AllDrugsTwitterAppImplementation.startStream(1,
         conf,
         sparkapps.tweetstream.MockInputDStream(1)_, // <-- how to make this curried?
         {
