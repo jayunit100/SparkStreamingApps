@@ -24,7 +24,7 @@ object Driver {
   private var numTweetsCollected = 0L
   private var partNum = 0
   private var gson = new Gson()
-
+var master : String = "";
   /**
    * Maintain twitter credentials in a /tmp/twitter file.
    * @param twitterParam
@@ -91,9 +91,10 @@ object Driver {
         "twitter4j.oauth." + Parser.CONSUMER_KEY, readParameter(Parser.CONSUMER_KEY).getOrElse({failTwFile(); ""}),
         "twitter4j.oauth." + Parser.CONSUMER_SECRET, readParameter(Parser.CONSUMER_SECRET).getOrElse({failTwFile(); ""}),
         "twitter4j.oauth." + Parser.ACCESS_TOKEN, readParameter(Parser.ACCESS_TOKEN).getOrElse({failTwFile() ; ""}),
-        "twitter4j.oauth." + Parser.ACCESS_TOKEN_SECRET, readParameter(Parser.ACCESS_TOKEN_SECRET).getOrElse({failTwFile(); ""}));
+        "twitter4j.oauth." + Parser.ACCESS_TOKEN_SECRET, readParameter(Parser.ACCESS_TOKEN_SECRET).getOrElse({failTwFile(); ""})
+      );
 
-      //TODO clean up this.  Could lead to infinite recursion.
+      //TODO clean up this.  Could lead to infinite recursion if minor coding error happens in this function.
       System.err.println("Usage: " + this.getClass.getSimpleName + " executing w/ default options ! " + defs)
       main(defs);
       return;
@@ -106,12 +107,13 @@ object Driver {
     val Array(
     //alphabetical order returned by values.
     Utils.IntParam(intervalSecs),
+    master,
     Utils.IntParam(numTweetsToCollect),
     outputDirectory,
-    Utils.IntParam(partitionsEachInterval),
-    master) = Parser.parse(args)
+    Utils.IntParam(partitionsEachInterval)
+    ) = Parser.parse(args)
 
-    System.out.println("interval seconds " + intervalSecs);
+    System.out.println("interval seconds " + intervalSecs );
     verifyAndRun(intervalSecs,numTweetsToCollect, new File(outputDirectory), partitionsEachInterval);
   }
 

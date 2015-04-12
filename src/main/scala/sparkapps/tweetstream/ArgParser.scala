@@ -29,7 +29,8 @@ object Parser {
       case "--numtweets" :: value :: tail => nextOption(map++Map("numtweets"->value),tail)
       case "--intervals" :: value :: tail => nextOption(map++Map("interval"->value),tail)
       case "--partitions" :: value :: tail => nextOption(map++Map("partitions"->value),tail)
-      case "--master" :: value :: tail => nextOption(map++Map("master"->value),tail)//i.e. local[2]
+      case "--master" :: value :: tail => nextOption(map++Map("master"->value),tail)
+      //if a arg doesnt come w/ --
       case unknown :: value :: tail =>
         System.out.println("Setting sys prop " + unknown + " "+value)
         System.setProperty(unknown,value)
@@ -49,7 +50,7 @@ object Parser {
       iter.next(),
       iter.next(),
       iter.next()) ;
-    System.out.println("Parsed inputs : " +returnVal)
+    System.out.println("Parsed inputs : " +returnVal.foreach(x => print(x + "  \n")))
     returnVal
   }
 }
