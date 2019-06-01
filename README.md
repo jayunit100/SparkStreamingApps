@@ -1,3 +1,32 @@
+# TL;DR 
+
+The spark streaming API used in this repo boils down to the following snippet which demonstrates how an RDD has
+multiple Tweets in it (in this case, the tweets may have medical content, and that this blueprint implements a CTakes medical term extraction from an ongoing twitter stream, which uses the CTakes lexicon).  But in any case, the thing to note is that
+RDDs of tweets have multiple tweets in them, so you have a nested processing loop, where in we (1) forEachRDD and (2) forEachTweet *in* the RDD.
+
+```
+
+    tweetStream.foreachRDD( transactions => {
+        CassandraConnector(conf).withSessionDo {
+        session => {
+          val x=1
+          Thread.sleep(1)
+          transactions.foreach({
+            xN =>
+              System.out.println("Running Cassandra Insert..." + xN)
+              System.out.println("Note that this can fail if cassandra isnt working...")
+              val xNtxt=xN.toString+" "+xN.getText;
+              session.executeAsync(s"INSERT INTO streaming_test.key_value (key, value) VALUES ('$xNtxt' , $x)")
+          })
+        }
+      }
+    })
+```
+
+# How to use this Repo
+
+I used this as my Demonstration at apachecon a few years ago to show how to build spark streaming apps.
+
 This repo has two different resources.
 
 - testing of spark docker containers, orchestrated via vagrant.
